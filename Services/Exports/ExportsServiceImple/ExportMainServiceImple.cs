@@ -19,9 +19,18 @@ namespace CommercialManagement.Services.Exports.ExportsServiceImple
             throw new NotImplementedException();
         }
 
-        public ExportMain GetbyId(int Id)
+        public ExportMainViewModel GetbyId(int Id)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var exportMainViewModel = _context.ExportMainViewModel
+                    .FirstOrDefault(c => c.ExpID == Id);
+                return exportMainViewModel;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         public List<ExportMainViewModel> GetExportMain(string ExpLCName)
@@ -44,5 +53,6 @@ namespace CommercialManagement.Services.Exports.ExportsServiceImple
         {
             throw new NotImplementedException();
         }
+        
     }
 }

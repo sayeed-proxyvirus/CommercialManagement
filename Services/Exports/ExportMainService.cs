@@ -9,6 +9,6 @@ namespace CommercialManagement.Services.Exports
         List<ExportMainViewModel> GetExportMain(string ExpLCName);
         bool AddExportMain(ExportMain exportMain);
         bool UpdateExportMain(ExportMain exportMain);
-        ExportMain GetbyId(int Id);
+        ExportMainViewModel GetbyId(int Id);
     }
 }
