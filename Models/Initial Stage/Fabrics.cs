@@ -9,7 +9,7 @@ namespace CommercialManagement.Models.Initial_Stage
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Column("ItemID")]
-        public int? ItemID { get; set; }
+        public int ItemID { get; set; }
         [Column("ItemCode")]
         public string? ItemCode { get; set; }
         [Column("ItemName")]

@@ -1,8 +1,148 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model CommercialManagement.Models.ViewModel.DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="container mt-4">
+    <div class="text-center mb-4">
+        <h1 class="display-5 fw-bold">Welcome to Commercial Dashboard</h1>
+        <p class="text-muted">Quick overview of your system at a glance</p>
+    </div>
+
+    <div class="row g-4">
+@*         <!-- Total Cases -->
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="card shadow-sm border-0 h-100 dashboard-card" onclick="window.location.href='@Url.Action("Index", "SAM_Litigation_Master")'">
+                <div class="card-body text-center">
+                    <div class="icon-circle bg-primary text-white mb-3">
+                        <i class="bi bi-folder-fill fs-2"></i>
+                    </div>
+                    <h5 class="card-title">Total Cases</h5>
+                    <h2 class="fw-bold text-primary" id="caseCount">@Model.TotalCases</h2>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending Cases -->
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="card shadow-sm border-0 h-100 dashboard-card" onclick="window.location.href='@Url.Action("FilterByStatus", "SAM_Litigation_Master", new { statusName = "Live" })'">
+                <div class="card-body text-center">
+                    <div class="icon-circle bg-warning text-white mb-3">
+                        <i class="bi bi-hourglass-split fs-2"></i>
+                    </div>
+                    <h5 class="card-title">Pending Cases</h5>
+                    <h2 class="fw-bold text-warning" id="pendingCount">@Model.PendingCases</h2>
+                </div>
+            </div>
+        </div>
+
+        <!-- Completed Cases -->
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="card shadow-sm border-0 h-100 dashboard-card" onclick="window.location.href='@Url.Action("FilterByStatus", "SAM_Litigation_Master", new { statusName = "Closed" })'">
+                <div class="card-body text-center">
+                    <div class="icon-circle bg-success text-white mb-3">
+                        <i class="bi bi-check-circle-fill fs-2"></i>
+                    </div>
+                    <h5 class="card-title">Completed Cases</h5>
+                    <h2 class="fw-bold text-success" id="completedCount">@Model.CompletedCases</h2>
+                </div>
+            </div>
+        </div>
+
+        <!-- Complainant -->
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="card shadow-sm border-0 h-100 dashboard-card" onclick="window.location.href='@Url.Action("FilterByPartyType", "SAM_Litigation_Master", new { isAgainst = false })'">
+                <div class="card-body text-center">
+                    <div class="icon-circle bg-info text-white mb-3">
+                        <i class="bi bi-people-fill fs-2"></i>
+                    </div>
+                    <h5 class="card-title">Total Complainant</h5>
+                    <h2 class="fw-bold text-info" id="complainantCount">@Model.TotalCasesOnBehalf</h2>
+                </div>
+            </div>
+        </div>
+
+        <!-- Defendant -->
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="card shadow-sm border-0 h-100 dashboard-card" onclick="window.location.href='@Url.Action("FilterByPartyType", "SAM_Litigation_Master", new { isAgainst = true })'">
+                <div class="card-body text-center">
+                    <div class="icon-circle bg-secondary text-white mb-3">
+                        <i class="bi bi-people-fill fs-2"></i>
+                    </div>
+                    <h5 class="card-title">Total Defendant</h5>
+                    <h2 class="fw-bold text-info" id="defendantCount">@Model.TotalCasesAgainst</h2>
+                </div>
+            </div>
+        </div> *@
+    </div>
 </div>
+
+@section Scripts {
+    <script>
+        // Example: Animate the numbers (optional)
+        document.querySelectorAll('.dashboard-card').forEach(card => {
+            card.addEventListener('mouseover', () => {
+                card.classList.add('shadow-lg');
+            });
+            card.addEventListener('mouseout', () => {
+                card.classList.remove('shadow-lg');
+            });
+        });
+
+        // Simple number animation (optional)
+        function animateCount(id, target) {
+            const el = document.getElementById(id);
+            let count = 0;
+            const step = target / 50; // smoother animation
+            const interval = setInterval(() => {
+                count += step;
+                if (count >= target) {
+                    count = target;
+                    clearInterval(interval);
+                }
+                el.textContent = Math.floor(count);
+            }, 20);
+        }
+
+        animateCount('caseCount', @Model.TotalCases);
+        animateCount('pendingCount', @Model.PendingCases);
+        animateCount('completedCount', @Model.CompletedCases);
+        animateCount('complainantCount', @Model.TotalCasesOnBehalf);
+        animateCount('defendantCount', @Model.TotalCasesAgainst);
+    </script>
+}
+
+<style>
+    .dashboard-card {
+        cursor: pointer;
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    }
+
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+        }
+
+    .icon-circle {
+        width: 70px;
+        height: 70px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 50%;
+        margin: 0 auto;
+    }
+
+    /* Responsive spacing */
+    @@media (max-width: 576px) {
+        .card-body h5
+
+    {
+        font-size: 1rem;
+    }
+
+    .card-body h2 {
+        font-size: 1.5rem;
+    }
+
+    }
+</style>

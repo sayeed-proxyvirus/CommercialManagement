@@ -180,7 +180,7 @@ namespace SAMLitigation.Services.ServiceImple
                     DisplayName = first.IsMenu ? first.ParentCode : first.DisplayName,
                     IconName = first.MenuIconName ?? "bi-circle",
                     ParentCode = first.ParentCode,
-                    ChieldCode = first.ChildCode,
+                    ChildCode = first.ChildCode,
                     IsMenu = first.IsMenu,
                     Children = new List<TreeNode>()
                 };
@@ -196,7 +196,7 @@ namespace SAMLitigation.Services.ServiceImple
                             DisplayName = item.DisplayName,
                             IconName = item.IconName ?? "bi-circle",
                             ParentCode = first.ParentCode,
-                            ChieldCode = item.ChildCode,
+                            ChildCode = item.ChildCode,
                             IsMenu = false,
                             Children = new List<TreeNode>()
                         };
