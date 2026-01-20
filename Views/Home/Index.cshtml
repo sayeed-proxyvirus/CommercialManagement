@@ -1,5 +1,4 @@
-﻿@model CommercialManagement.Models.ViewModel.DashboardViewModel
-@{
+﻿@{
     ViewData["Title"] = "Dashboard";
 }
 
@@ -88,27 +87,6 @@
                 card.classList.remove('shadow-lg');
             });
         });
-
-        // Simple number animation (optional)
-        function animateCount(id, target) {
-            const el = document.getElementById(id);
-            let count = 0;
-            const step = target / 50; // smoother animation
-            const interval = setInterval(() => {
-                count += step;
-                if (count >= target) {
-                    count = target;
-                    clearInterval(interval);
-                }
-                el.textContent = Math.floor(count);
-            }, 20);
-        }
-
-        animateCount('caseCount', @Model.TotalCases);
-        animateCount('pendingCount', @Model.PendingCases);
-        animateCount('completedCount', @Model.CompletedCases);
-        animateCount('complainantCount', @Model.TotalCasesOnBehalf);
-        animateCount('defendantCount', @Model.TotalCasesAgainst);
     </script>
 }
 

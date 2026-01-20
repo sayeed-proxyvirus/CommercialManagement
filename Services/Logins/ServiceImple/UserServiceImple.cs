@@ -17,20 +17,27 @@ namespace CommercialManagement.Services.ServiceImple
             _logger = logger;
         }
 
+        public User GetUserByUsername(string username)
+        {
+            try
+            {
+                var user = _context.User
+                    .FirstOrDefault(u => u.UserName == username);
+                return user;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting user by username: {Username}", username);
+                throw;
+            }
+        }
+
         public User GetUserById(int userId)
         {
             try
             {
-                // TODO: Create stored procedure: usp_GetUserById
-                // Parameters: @UserID INT
-                // Returns: Single user record
-
-                var param = new SqlParameter("@UserID", userId);
                 var user = _context.User
-                    .FromSqlRaw("EXEC usp_GetUserById @UserID", param)
-                    .AsEnumerable()
-                    .FirstOrDefault();
-
+                    .FirstOrDefault(u => u.UserID == userId);
                 return user;
             }
             catch (Exception ex)
@@ -39,8 +46,6 @@ namespace CommercialManagement.Services.ServiceImple
                 throw;
             }
         }
-
-
 
         public List<User> GetAllUsers()
         {
@@ -179,18 +184,6 @@ namespace CommercialManagement.Services.ServiceImple
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting user by email: {Email}", email);
-                throw;
-            }
-        }
-        public User GetUserByUsername(string username)
-        {
-            try
-            {
-                return _context.User.FirstOrDefault(u => u.UserName == username);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting user by username: {Username}", username);
                 throw;
             }
         }

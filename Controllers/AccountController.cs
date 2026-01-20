@@ -45,10 +45,19 @@ namespace CommercialManagement.Controllers
                 // Get user by Username
                 var user = _userService.GetUserByUsername(model.UserName);
 
+                // NULL CHECK #1 - User might not exist
                 if (user == null)
                 {
                     TempData["ErrorMessage"] = "Invalid username or password.";
                     _logger.LogWarning("Failed login attempt for username: {Username}", model.UserName);
+                    return View(model);
+                }
+
+                // NULL CHECK #2 - user.Upassword might be null
+                if (string.IsNullOrEmpty(user.Upassword))
+                {
+                    TempData["ErrorMessage"] = "Invalid username or password.";
+                    _logger.LogWarning("User {Username} has null password in database", model.UserName);
                     return View(model);
                 }
 
@@ -60,7 +69,7 @@ namespace CommercialManagement.Controllers
                     return View(model);
                 }
 
-                // Set session variables
+                // NULL CHECK #3 - Set session with null-coalescing
                 HttpContext.Session.SetInt32("UserId", user.UserID);
                 HttpContext.Session.SetString("UserName", user.UserName ?? "");
                 HttpContext.Session.SetString("FullName", user.FullName ?? "");
