@@ -100,11 +100,9 @@ namespace CommercialManagement.Controllers
             try
             {
                 var username = HttpContext.Session.GetString("UserName");
-
                 HttpContext.Session.Clear();
 
                 _logger.LogInformation("User {Username} logged out", username);
-
                 TempData["SuccessMessage"] = "You have been logged out successfully.";
                 return RedirectToAction("Login");
             }
@@ -122,7 +120,6 @@ namespace CommercialManagement.Controllers
             {
                 return RedirectToAction("Login");
             }
-
             return View();
         }
 
@@ -138,7 +135,6 @@ namespace CommercialManagement.Controllers
                 {
                     return RedirectToAction("Login");
                 }
-
                 if (!ModelState.IsValid)
                 {
                     return View(model);

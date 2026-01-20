@@ -16,11 +16,6 @@ namespace CommercialManagement.Models.Initial_Stage
         public string? ItemName { get; set; }
         [Column("CreatedAt")]
         public DateTime? CreatedAt { get; set; }
-        [Column("CreatedBy")]
-        public string? CreatedBy { get; set; }
-        [Column("ModifiedAt")]
-        public DateTime? ModifiedAt { get; set; }
-        [Column("ModifiedBy")]
-        public string? ModifiedBy { get; set; }
+
     }
 }
