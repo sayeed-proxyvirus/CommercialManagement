@@ -1,63 +1,71 @@
 using CommercialManagement.Models.ApplicationDBContext;
 using CommercialManagement.Services;
+using CommercialManagement.Services.ServiceImple;
 using CommercialManagement.Services.Exports;
 using CommercialManagement.Services.Exports.ExportsServiceImple;
-using CommercialManagement.Services.ServiceImple;
-using Microsoft.AspNetCore.Cors.Infrastructure;
+using SAMLitigation.Services;
+using SAMLitigation.Services.ServiceImple;
 using Microsoft.EntityFrameworkCore;
+using CommercialManagement.Services.Logins.LoginServices;
 
 var builder = WebApplication.CreateBuilder(args);
-// Register AppDbContext with connection string
-var connectionString = builder.Configuration.GetConnectionString("CommercialDBConn");
-builder.Services.AddDbContext<CommercialDBContext>(options =>
-    options.UseSqlServer(connectionString));
 
-// Register Services
-builder.Services.AddScoped<ApplicantConsigneesService, ApplicantConsigneesServiceImple>();
-builder.Services.AddScoped<BeneficiaryService, BeneficiaryServiceImple>();
-builder.Services.AddScoped<CustomerService, CustomerServiceImple>();
-builder.Services.AddScoped<FabricsService, FabricsServiceImple>();
-builder.Services.AddScoped<NotifyingPartyService, NotifyingPartyServiceImple>();
-builder.Services.AddScoped<PartyService, PartyServiceImple>();
-builder.Services.AddScoped<ExportDataService, ExportDataServiceImple>();
-builder.Services.AddScoped<ExportLCItemsService, ExportLCItemsServiceImple>();
-builder.Services.AddScoped<ExportMainService, ExportMainServiceImple>();
-
-// Add services to the container.
+// Add services to the container
 builder.Services.AddControllersWithViews();
-builder.Services.AddHttpContextAccessor();
-builder.Services.AddAuthentication("MyCookieAuth")
-    .AddCookie("MyCookieAuth", options =>
-    {
-        options.LoginPath = "/Login/Index";
-        options.AccessDeniedPath = "/Login/AccessDenied";
-    });
 
+// Add DbContext
+builder.Services.AddDbContext<CommercialDBContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("CommercialDBConn")));
+
+// Add Session support
+builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30);
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
+    options.Cookie.Name = ".CommercialManagement.Session";
 });
+
+// Add HttpContextAccessor
+builder.Services.AddHttpContextAccessor();
+
+// Register Services
+builder.Services.AddScoped<UserService, UserServiceImple>();
+builder.Services.AddScoped<CustomerService, CustomerServiceImple>();
+builder.Services.AddScoped<BeneficiaryService, BeneficiaryServiceImple>();
+builder.Services.AddScoped<ApplicantConsigneesService, ApplicantConsigneesServiceImple>();
+builder.Services.AddScoped<NotifyingPartyService, NotifyingPartyServiceImple>();
+builder.Services.AddScoped<PartyService, PartyServiceImple>();
+builder.Services.AddScoped<FabricsService, FabricsServiceImple>();
+builder.Services.AddScoped<DynamicMenuService, DynamicMenuServiceImple>();
+builder.Services.AddScoped<ExportDataService, ExportDataServiceImple>();
+//builder.Services.AddScoped<ExportInvoiceService, ExportInvoiceServiceImple>();
+builder.Services.AddScoped<ExportMainService, ExportMainServiceImple>();
+builder.Services.AddScoped<ExportLCItemsService, ExportLCItemsServiceImple>();
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Configure the HTTP request pipeline
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
- 
+
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
 
+// Enable Session
+app.UseSession();
+
 app.UseAuthorization();
 
+// Default route
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Account}/{action=Login}/{id?}");
 
 app.Run();
