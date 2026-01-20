@@ -20,28 +20,43 @@ namespace CommercialManagement.Controllers.Basics
             try
             {
                 List<Fabrics> ListFabrics = _fabricsService.GetFabrics();
-                ViewBag.ListFabrics = ListFabrics.Select(x => new SelectListItem
-                {
-                    Value = x.ItemID.ToString(),
-                    Text = x.ItemName
-                }).ToList() ?? new List<SelectListItem>();
-                return View();
+                return View(ListFabrics);
             }
             catch (Exception)
             {
-                throw;
+                TempData["ErrorMessage"] = "Failed to load fabrics. Please try again.";
+                return View(new List<Fabrics>());
             }
             
         }
+        //Modal Form
+        [HttpGet]
+        public IActionResult GetFabricForm()
+        {
+            try
+            {
+                //empty modal
+                var model = new Fabrics();
+                return PartialView("_FabricForm", model);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading add fabric form");
+                return BadRequest("Failed to load form");
+            }
+        }
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult AddFabrics(Fabrics formData) 
         {
             try
             {
+                var userName = HttpContext.Session.GetString("UserName") ?? "System";
                 var Fabrics = new Fabrics
                 {
-                    ItemName = formData.ItemName,
-                    ItemCode = formData.ItemCode
+                    ItemName = formData.ItemName?.Trim(),
+                    ItemCode = formData.ItemCode?.Trim(),
+                    CreatedAt = DateTime.Now,
                 };
                 bool success = _fabricsService.AddFabrics(Fabrics);
                 if (success)
@@ -68,12 +83,34 @@ namespace CommercialManagement.Controllers.Basics
                 throw;
             }
         }
+        //Edit Modal Form
+        [HttpGet]
+        public IActionResult GetFabricForEdit(int id)
+        {
+            try
+            {
+                var fabric = _fabricsService.GetbyId(id);
+                if (fabric == null)
+                {
+                    _logger.LogWarning("Fabric not found with ID: {Id}", id);
+                    return NotFound("Fabric not found");
+                }
+                return PartialView("_FabricForm", fabric);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading fabric for edit with ID: {Id}", id);
+                return BadRequest("Failed to load fabric data");
+            }
+        }
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult UpdateFabrics(Fabrics formData) 
         {
             try
             {
                 _logger.LogInformation($"Updating Fabrics: {formData.ItemName}");
+                var userName = HttpContext.Session.GetString("UserName") ?? "System";
                 var existingFab = _fabricsService.GetbyId(formData.ItemID);
                 if (existingFab == null) 
                 {
@@ -83,8 +120,8 @@ namespace CommercialManagement.Controllers.Basics
                         message = "Fabrics not found."
                     });
                 }
-                existingFab.ItemName = formData.ItemName;
-                existingFab.ItemCode = formData.ItemCode;
+                existingFab.ItemName = formData.ItemName?.Trim();
+                existingFab.ItemCode = formData.ItemCode?.Trim();
                 bool success = _fabricsService.UpdateFabrics(existingFab);
                 if (success)
                 {
