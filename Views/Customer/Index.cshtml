@@ -1,0 +1,317 @@
+﻿@model List<CommercialManagement.Models.Initial_Stage.Customer>
+@{
+    ViewData["Title"] = "Customer Management";
+}
+
+<div class="container-fluid">
+    <!-- Alert Messages -->
+    <div id="alertContainer"></div>
+
+    <!-- Customer Table Card -->
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white border-bottom">
+            <div class="row align-items-center">
+                <div class="col-md-4">
+                    <h5 class="mb-0">
+                        <i class="bi bi-list-ul"></i> Customer List
+                    </h5>
+                </div>
+                <div class="col-md-4">
+                    <button class="btn btn-primary btn-lg shadow-sm" id="btnAddCustomer">
+                        <i class="bi bi-plus-circle me-2"></i>Add New Customer
+                    </button>
+                </div>
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input type="text"
+                               class="form-control border-start-0"
+                               id="searchInput"
+                               placeholder="Search by code or name...">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0" id="customerTable">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="px-4" style="width: 80px;">ID</th>
+                            <th>Customer Code</th>
+                            <th>Customer Name</th>
+                            <th>Created At</th>
+                            <th class="text-center" style="width: 100px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Any())
+                        {
+                            foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td class="px-4 fw-semibold">@item.CustID</td>
+                                    <td>
+                                        <span class="badge bg-secondary">@(item.CustCode ?? "-")</span>
+                                    </td>
+                                    <td class="fw-medium">@(item.CustName ?? "-")</td>
+                                    <td class="text-muted">
+                                        @(item.CreatedAt.HasValue ? item.CreatedAt.Value.ToString("MMM dd, yyyy") : "-")
+                                    </td>
+                                    <td class="text-center">
+                                        <button type="button"
+                                                class="btn btn-sm btn-outline-warning"
+                                                onclick="editCustomer(@item.CustID)"
+                                                title="Edit Customer">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="8" class="text-center py-5 text-muted">
+                                    <i class="bi bi-inbox fs-1 d-block mb-3"></i>
+                                    <p class="mb-0">No customers found</p>
+                                    <button class="btn btn-primary mt-3" id="btnAddFirstCustomer">
+                                        <i class="bi bi-plus-circle me-2"></i>Add Your First Customer
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        @if (Model != null && Model.Any())
+        {
+            <div class="card-footer bg-white border-top">
+                <div class="d-flex justify-content-between align-items-center">
+                    <small class="text-muted">
+                        Showing @Model.Count customer@(Model.Count != 1 ? "s" : "")
+                    </small>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Modal Container for Partial Views -->
+<div id="customerModalContainer"></div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            setupEventListeners();
+            setupSearch();
+        });
+
+        function setupEventListeners() {
+            // Add customer button click
+            $('#btnAddCustomer, #btnAddFirstCustomer').on('click', function() {
+                loadCustomerModal(null);
+            });
+        }
+
+        function setupSearch() {
+            $('#searchInput').on('keyup', function() {
+                const searchTerm = $(this).val().toLowerCase();
+
+                $('#customerTable tbody tr').each(function() {
+                    const rowText = $(this).text().toLowerCase();
+                    $(this).toggle(rowText.indexOf(searchTerm) > -1);
+                });
+
+                // Update count
+                const visibleRows = $('#customerTable tbody tr:visible').length;
+                if (visibleRows === 0 || $('#customerTable tbody tr:visible td[colspan="8"]').length > 0) {
+                    // Don't update if showing empty state
+                } else {
+                    $('.card-footer small').text(`Showing ${visibleRows} customer${visibleRows !== 1 ? 's' : ''}`);
+                }
+            });
+        }
+
+        function loadCustomerModal(customerId) {
+            const url = customerId
+                ? '@Url.Action("GetCustomerForEdit", "Customer")?id=' + customerId
+                : '@Url.Action("GetCustomerForm", "Customer")';
+
+            $.ajax({
+                url: url,
+                type: 'GET',
+                success: function(response) {
+                    $('#customerModalContainer').html(response);
+
+                    // Show the modal
+                    const modalId = customerId ? '#editCustomerModal' : '#addCustomerModal';
+                    $(modalId).modal('show');
+
+                    // Setup form submission
+                    setupFormSubmission(customerId);
+                },
+                error: function() {
+                    showAlert('danger', 'Failed to load customer form. Please try again.');
+                }
+            });
+        }
+
+        function setupFormSubmission(customerId) {
+            const formId = customerId ? '#editCustomerForm' : '#addCustomerForm';
+            const actionUrl = customerId
+                ? '@Url.Action("UpdateCustomer", "Customer")'
+                : '@Url.Action("AddCustomer", "Customer")';
+            const modalId = customerId ? '#editCustomerModal' : '#addCustomerModal';
+
+            $(formId).on('submit', function(e) {
+                e.preventDefault();
+
+                if (!this.checkValidity()) {
+                    e.stopPropagation();
+                    this.classList.add('was-validated');
+                    return;
+                }
+
+                const formData = $(this).serialize();
+
+                $.ajax({
+                    url: actionUrl,
+                    type: 'POST',
+                    data: formData,
+                    success: function(response) {
+                        if (response.success) {
+                            showAlert('success', response.message);
+                            $(modalId).modal('hide');
+                            setTimeout(() => location.reload(), 1500);
+                        } else {
+                            showAlert('danger', response.message);
+                        }
+                    },
+                    error: function() {
+                        showAlert('danger', 'An error occurred. Please try again.');
+                    }
+                });
+            });
+        }
+
+        function editCustomer(customerId) {
+            loadCustomerModal(customerId);
+        }
+
+        function showAlert(type, message) {
+            const iconMap = {
+                'success': 'check-circle',
+                'danger': 'exclamation-triangle',
+                'warning': 'exclamation-circle',
+                'info': 'info-circle'
+            };
+
+            const alertHtml = `
+                <div class="alert alert-${type} alert-dismissible fade show shadow-sm" role="alert">
+                    <i class="bi bi-${iconMap[type] || 'info-circle'} me-2"></i>
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `;
+
+            $('#alertContainer').html(alertHtml);
+
+            // Auto dismiss after 5 seconds
+            setTimeout(() => {
+                $('.alert').fadeOut('slow', function() {
+                    $(this).remove();
+                });
+            }, 5000);
+
+            // Scroll to alert
+            $('html, body').animate({
+                scrollTop: $('#alertContainer').offset().top - 100
+            }, 300);
+        }
+    </script>
+}
+
+<style>
+    .card {
+        border-radius: 12px;
+        transition: box-shadow 0.3s ease;
+    }
+
+        .card:hover {
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1) !important;
+        }
+
+    .table thead th {
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+        color: #6c757d;
+        border-bottom: 2px solid #dee2e6;
+    }
+
+    .table tbody tr {
+        transition: background-color 0.2s ease;
+    }
+
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+    .btn-outline-warning:hover {
+        color: #000;
+    }
+
+    .badge {
+        padding: 0.5em 0.75em;
+        font-weight: 500;
+        font-size: 0.85rem;
+    }
+
+    .input-group-text {
+        background-color: #f8f9fa;
+    }
+
+    .form-control:focus,
+    .input-group:focus-within .form-control {
+        border-color: #1b6ec2;
+        box-shadow: 0 0 0 0.2rem rgba(27, 110, 194, 0.25);
+    }
+
+    .input-group:focus-within .input-group-text {
+        border-color: #1b6ec2;
+    }
+
+    @@media (max-width: 768px) {
+        .table
+
+    {
+        font-size: 0.875rem;
+    }
+
+    .card-header .row {
+        row-gap: 1rem;
+    }
+
+    .btn-lg {
+        font-size: 1rem;
+        padding: 0.5rem 1rem;
+    }
+
+    }
+
+    /* Loading state */
+    .table tbody tr.loading {
+        opacity: 0.6;
+        pointer-events: none;
+    }
+
+    /* Empty state styling */
+    .table tbody td[colspan] i {
+        color: #adb5bd;
+    }
+</style>
