@@ -3,7 +3,7 @@
 @{
     bool isEdit = Model?.BenID > 0;
     string modalId = isEdit ? "editBeneficiaryModal" : "addBeneficiaryModal";
-    string formId = isEdit ? "editBeneficiaryModal" : "addBeneficiaryModal";
+    string formId = isEdit ? "editBeneficiaryForm" : "addBeneficiaryForm";
     string modalTitle = isEdit ? "Edit Beneficiary" : "Add New Beneficiary";
     string headerClass = isEdit ? "bg-warning text-dark" : "bg-primary text-white";
     string iconClass = isEdit ? "bi-pencil-square" : "bi-plus-circle";
@@ -26,53 +26,51 @@
                 <div class="modal-body">
                     @if (isEdit)
                     {
-                        <input type="hidden" name="ApplicantID" value="@Model.ApplicantID" />
+                        <input type="hidden" name="BenID" value="@Model.BenID" />
 
-                        <div class="alert alert-info border-0 mb-3">
+                        <div class="alert alert-info border-0 mb-0">
                             <i class="bi bi-info-circle me-2"></i>
-                            <small>Editing Applicant ID: <strong>@Model.ApplicantID</strong></small>
+                            <small>Editing Beneficiary ID: <strong>@Model.BenID</strong></small>
                         </div>
                     }
 
-                    <div class="mb-3">
-                        <label for="ApplicantCode" class="form-label">
-                            <i class="bi bi-upc-scan text-primary"></i> Applicant Code
+                    <div class="mb-0">
+                        <label for="BenCode" class="form-label">
+                            <i class="bi bi-upc-scan text-primary"></i> Beneficiary Code
                             <span class="text-danger">*</span>
                         </label>
                         <input type="text"
                                class="form-control"
-                               id="ApplicantCode"
-                               name="ApplicantCode"
-                               value="@(Model?.ApplicantCode ?? "")"
-                               placeholder="e.g., APP-001"
+                               id="BenCode"
+                               name="BenCode"
+                               value="@(Model?.BenCode ?? "")"
                                required
                                maxlength="50">
                         <div class="invalid-feedback">
-                            Please provide a valid applicant code.
+                            Please provide a valid beneficiary code.
                         </div>
                         <small class="form-text text-muted">
-                            Enter a unique code for this applicant (max 50 characters)
+                            Enter a unique code for this beneficiary (max 50 characters)
                         </small>
                     </div>
 
-                    <div class="mb-3">
-                        <label for="ApplicantName" class="form-label">
-                            <i class="bi bi-person-badge text-primary"></i> Applicant Name
+                    <div class="mb-0">
+                        <label for="BenName" class="form-label">
+                            <i class="bi bi-tag text-primary"></i> Beneficiary Name
                             <span class="text-danger">*</span>
                         </label>
                         <input type="text"
                                class="form-control"
-                               id="ApplicantName"
-                               name="ApplicantName"
-                               value="@(Model?.ApplicantName ?? "")"
-                               placeholder="e.g., ABC Corporation Ltd."
+                               id="BenName"
+                               name="BenName"
+                               value="@(Model?.BenName ?? "")"
                                required
                                maxlength="200">
                         <div class="invalid-feedback">
-                            Please provide a valid applicant name.
+                            Please provide a valid beneficiary name.
                         </div>
                         <small class="form-text text-muted">
-                            Enter the full name of the applicant/consignee (max 200 characters)
+                            Enter the name of the beneficiary (max 200 characters)
                         </small>
                     </div>
 
@@ -120,7 +118,7 @@
 
         // Auto-focus first input when modal is shown
         $('#@modalId').on('shown.bs.modal', function() {
-            $('#ApplicantCode').focus();
+            $('#BenCode').focus();
         });
 
         // Clear validation on modal hide
@@ -130,7 +128,7 @@
         });
 
         // Real-time validation feedback
-        $('#ApplicantCode, #ApplicantName').on('input', function() {
+        $('#BenCode, #BenName').on('input', function() {
             if ($(this).val().trim() !== '') {
                 $(this).removeClass('is-invalid').addClass('is-valid');
             } else {
@@ -151,18 +149,15 @@
         border-top-left-radius: 12px;
         border-top-right-radius: 12px;
         border-bottom: none;
-        padding: 1.25rem 1.5rem;
     }
 
     .modal-body {
-        padding: 1.5rem;
     }
 
     .modal-footer {
         border-bottom-left-radius: 12px;
         border-bottom-right-radius: 12px;
         border-top: 1px solid #dee2e6;
-        padding: 1rem 1.5rem;
     }
 
     .form-label {
@@ -214,12 +209,14 @@
     }
 
     @@media (max-width: 576px) {
-        .modal-dialog {
-            margin: 0.5rem;
-        }
+        .modal-dialog
 
-        .modal-body {
-            padding: 1rem;
-        }
+    {
+        margin: 0.5rem;
+    }
+
+    .modal-body {
+    }
+
     }
 </style>
