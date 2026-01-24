@@ -58,6 +58,8 @@ namespace CommercialManagement.Controllers.Basics
                 {
                     BenName = formData.BenName?.Trim(),
                     BenCode = formData.BenCode?.Trim(),
+                    Remarks = formData.Remarks?.Trim(),
+                    Address = formData.Address?.Trim(),
                     CreatedAt = DateTime.Now,
                 };
                 bool success = _beneficiaryService.AddBeneficiary(Beneficiary);
@@ -100,7 +102,7 @@ namespace CommercialManagement.Controllers.Basics
                     _logger.LogWarning("Beneficiary not found with ID: {Id}", id);
                     return NotFound("Beneficiary not found");
                 }
-                return PartialView("_ApplicantForm", Beneficiary);
+                return PartialView("_BeneficiaryForm", Beneficiary);
             }
             catch (Exception ex)
             {
@@ -127,6 +129,8 @@ namespace CommercialManagement.Controllers.Basics
                 }
                 existingBen.BenName = formData.BenName?.Trim();
                 existingBen.BenCode = formData.BenCode?.Trim();
+                existingBen.Address = formData.Address?.Trim();
+                existingBen.Remarks = formData.Remarks?.Trim();
                 bool success = _beneficiaryService.UpdateBeneficiary(existingBen);
                 if (success)
                 {

@@ -1,14 +1,14 @@
-﻿@model CommercialManagement.Models.Initial_Stage.Beneficiary
+﻿@model CommercialManagement.Models.Initial_Stage.Customer
 
 @{
-    bool isEdit = Model?.BenID > 0;
-    string modalId = isEdit ? "editBeneficiaryModal" : "addBeneficiaryModal";
-    string formId = isEdit ? "editBeneficiaryForm" : "addBeneficiaryForm";
-    string modalTitle = isEdit ? "Edit Beneficiary" : "Add New Beneficiary";
+    bool isEdit = Model?.CustID > 0;
+    string modalId = isEdit ? "editCustomerModal" : "addCustomerModal";
+    string formId = isEdit ? "editCustomerForm" : "addCustomerForm";
+    string modalTitle = isEdit ? "Edit Customer" : "Add New Customer";
     string headerClass = isEdit ? "bg-warning text-dark" : "bg-primary text-white";
     string iconClass = isEdit ? "bi-pencil-square" : "bi-plus-circle";
     string btnClass = isEdit ? "btn-warning" : "btn-primary";
-    string btnText = isEdit ? "Update Beneficiary" : "Add Beneficiary";
+    string btnText = isEdit ? "Update Customer" : "Add Customer";
     string btnCloseClass = isEdit ? "" : "btn-close-white";
 }
 
@@ -26,85 +26,51 @@
                 <div class="modal-body">
                     @if (isEdit)
                     {
-                        <input type="hidden" name="BenID" value="@Model.BenID" />
+                        <input type="hidden" name="CustID" value="@Model.CustID" />
 
                         <div class="alert alert-info border-0 mb-0">
                             <i class="bi bi-info-circle me-2"></i>
-                            <small>Editing Beneficiary ID: <strong>@Model.BenID</strong></small>
+                            <small>Editing Customer ID: <strong>@Model.CustID</strong></small>
                         </div>
                     }
 
                     <div class="mb-0">
-                        <label for="BenCode" class="form-label">
-                            <i class="bi bi-upc-scan text-primary"></i> Beneficiary Code
+                        <label for="CustCode" class="form-label">
+                            <i class="bi bi-upc-scan text-primary"></i> Customer Code
                             <span class="text-danger">*</span>
                         </label>
                         <input type="text"
                                class="form-control"
-                               id="BenCode"
-                               name="BenCode"
-                               value="@(Model?.BenCode ?? "")"
+                               id="CustCode"
+                               name="CustCode"
+                               value="@(Model?.CustCode ?? "")"
                                required
                                maxlength="50">
                         <div class="invalid-feedback">
-                            Please provide a valid beneficiary code.
+                            Please provide a valid customer code.
                         </div>
                         <small class="form-text text-muted">
-                            Enter a unique code for this beneficiary (max 50 characters)
+                            Enter a unique code for this customer (max 50 characters)
                         </small>
                     </div>
 
                     <div class="mb-0">
-                        <label for="BenName" class="form-label">
-                            <i class="bi bi-tag text-primary"></i> Beneficiary Name
+                        <label for="CustName" class="form-label">
+                            <i class="bi bi-tag text-primary"></i> Customer Name
                             <span class="text-danger">*</span>
                         </label>
                         <input type="text"
                                class="form-control"
-                               id="BenName"
-                               name="BenName"
-                               value="@(Model?.BenName ?? "")"
+                               id="CustName"
+                               name="CustName"
+                               value="@(Model?.CustName ?? "")"
                                required
                                maxlength="200">
                         <div class="invalid-feedback">
-                            Please provide a valid beneficiary name.
+                            Please provide a valid customer name.
                         </div>
                         <small class="form-text text-muted">
-                            Enter the name of the beneficiary (max 200 characters)
-                        </small>
-                    </div>
-                    <div class="mb-0">
-                        <label for="Remarks" class="form-label">
-                            <i class="bi bi-tag text-primary"></i> Beneficiary Remarks
-                            <span class="text-danger">*</span>
-                        </label>
-                        <input type="text"
-                               class="form-control"
-                               id="Remarks"
-                               name="Remarks"
-                               value="@(Model?.Remarks ?? "")"
-                               maxlength="200">
-                        <small class="form-text text-muted">
-                            Enter the remarks of the beneficiary (max 200 characters)
-                        </small>
-                    </div>
-                    <div class="mb-0">
-                        <label for="Address" class="form-label">
-                            <i class="bi bi-tag text-primary"></i> Address
-                            <span class="text-danger">*</span>
-                        </label>
-                        <input type="text"
-                               class="form-control"
-                               id="Address"
-                               name="Address"
-                               value="@(Model?.Address ?? "")"
-                               required
-                               maxlength="500">
-                        <div class="invalid-feedback">
-                            Please provide a valid beneficiary name.
-                        </div>
-                        <small class="form-text text-muted">
-                            Enter the address of the beneficiary (max 200 characters)
+                            Enter the name of the customer (max 200 characters)
                         </small>
                     </div>
 
@@ -152,7 +118,7 @@
 
         // Auto-focus first input when modal is shown
         $('#@modalId').on('shown.bs.modal', function() {
-            $('#BenCode').focus();
+            $('#CustCode').focus();
         });
 
         // Clear validation on modal hide
@@ -162,7 +128,7 @@
         });
 
         // Real-time validation feedback
-        $('#BenCode, #BenName').on('input', function() {
+        $('#CustCode, #CustName').on('input', function() {
             if ($(this).val().trim() !== '') {
                 $(this).removeClass('is-invalid').addClass('is-valid');
             } else {

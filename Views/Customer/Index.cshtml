@@ -1,24 +1,24 @@
-﻿@model List<CommercialManagement.Models.Initial_Stage.Beneficiary>
+﻿@model List<CommercialManagement.Models.Initial_Stage.Customer>
 @{
-    ViewData["Title"] = "Beneficiary Management";
+    ViewData["Title"] = "Customer Management";
 }
 
 <div class="container-fluid">
     <!-- Alert Messages -->
     <div id="alertContainer"></div>
 
-    <!-- Beneficiary Table Card -->
+    <!-- Customer Table Card -->
     <div class="card shadow-sm border-0">
         <div class="card-header bg-white border-bottom">
             <div class="row align-items-center">
                 <div class="col-md-4">
                     <h5 class="mb-0">
-                        <i class="bi bi-list-ul"></i> Beneficiary List
+                        <i class="bi bi-list-ul"></i> Customer List
                     </h5>
                 </div>
                 <div class="col-md-4">
-                    <button class="btn btn-primary btn-lg shadow-sm" id="btnAddBeneficiary">
-                        <i class="bi bi-plus-circle me-2"></i>Add New Beneficiary
+                    <button class="btn btn-primary btn-lg shadow-sm" id="btnAddCustomer">
+                        <i class="bi bi-plus-circle me-2"></i>Add New Customer
                     </button>
                 </div>
                 <div class="col-md-4">
@@ -36,14 +36,12 @@
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0" id="beneficiaryTable">
+                <table class="table table-hover align-middle mb-0" id="customerTable">
                     <thead class="table-light">
                         <tr>
                             <th class="px-4" style="width: 80px;">ID</th>
-                            <th>Beneficiary Code</th>
-                            <th>Beneficiary Name</th>
-                            <th>Remarks</th>
-                            <th>Address</th>
+                            <th>Customer Code</th>
+                            <th>Customer Name</th>
                             <th>Created At</th>
                             <th class="text-center" style="width: 100px;">Actions</th>
                         </tr>
@@ -54,21 +52,19 @@
                             foreach (var item in Model)
                             {
                                 <tr>
-                                    <td class="px-4 fw-semibold">@item.BenID</td>
+                                    <td class="px-4 fw-semibold">@item.CustID</td>
                                     <td>
-                                        <span class="badge bg-secondary">@(item.BenCode ?? "-")</span>
+                                        <span class="badge bg-secondary">@(item.CustCode ?? "-")</span>
                                     </td>
-                                    <td class="fw-medium">@(item.BenName ?? "-")</td>
-                                    <td class="fw-medium">@(item.Remarks ?? "-")</td>
-                                    <td class="fw-medium">@(item.Address ?? "-")</td>
+                                    <td class="fw-medium">@(item.CustName ?? "-")</td>
                                     <td class="text-muted">
                                         @(item.CreatedAt.HasValue ? item.CreatedAt.Value.ToString("MMM dd, yyyy") : "-")
                                     </td>
                                     <td class="text-center">
                                         <button type="button"
                                                 class="btn btn-sm btn-outline-warning"
-                                                onclick="editBeneficiary(@item.BenID)"
-                                                title="Edit Beneficiary">
+                                                onclick="editCustomer(@item.CustID)"
+                                                title="Edit Customer">
                                             <i class="bi bi-pencil"></i>
                                         </button>
                                     </td>
@@ -80,9 +76,9 @@
                             <tr>
                                 <td colspan="8" class="text-center py-5 text-muted">
                                     <i class="bi bi-inbox fs-1 d-block mb-3"></i>
-                                    <p class="mb-0">No beneficiaries found</p>
-                                    <button class="btn btn-primary mt-3" id="btnAddFirstBeneficiary">
-                                        <i class="bi bi-plus-circle me-2"></i>Add Your First Beneficiary
+                                    <p class="mb-0">No customers found</p>
+                                    <button class="btn btn-primary mt-3" id="btnAddFirstCustomer">
+                                        <i class="bi bi-plus-circle me-2"></i>Add Your First Customer
                                     </button>
                                 </td>
                             </tr>
@@ -96,7 +92,7 @@
             <div class="card-footer bg-white border-top">
                 <div class="d-flex justify-content-between align-items-center">
                     <small class="text-muted">
-                        Showing @Model.Count beneficiar@(Model.Count != 1 ? "ies" : "y")
+                        Showing @Model.Count customer@(Model.Count != 1 ? "s" : "")
                     </small>
                 </div>
             </div>
@@ -105,7 +101,7 @@
 </div>
 
 <!-- Modal Container for Partial Views -->
-<div id="beneficiaryModalContainer"></div>
+<div id="customerModalContainer"></div>
 
 @section Scripts {
     <script>
@@ -115,9 +111,9 @@
         });
 
         function setupEventListeners() {
-            // Add beneficiary button click
-            $('#btnAddBeneficiary, #btnAddFirstBeneficiary').on('click', function() {
-                loadBeneficiaryModal(null);
+            // Add customer button click
+            $('#btnAddCustomer, #btnAddFirstCustomer').on('click', function() {
+                loadCustomerModal(null);
             });
         }
 
@@ -125,51 +121,51 @@
             $('#searchInput').on('keyup', function() {
                 const searchTerm = $(this).val().toLowerCase();
 
-                $('#beneficiaryTable tbody tr').each(function() {
+                $('#customerTable tbody tr').each(function() {
                     const rowText = $(this).text().toLowerCase();
                     $(this).toggle(rowText.indexOf(searchTerm) > -1);
                 });
 
                 // Update count
-                const visibleRows = $('#beneficiaryTable tbody tr:visible').length;
-                if (visibleRows === 0 || $('#beneficiaryTable tbody tr:visible td[colspan="8"]').length > 0) {
+                const visibleRows = $('#customerTable tbody tr:visible').length;
+                if (visibleRows === 0 || $('#customerTable tbody tr:visible td[colspan="8"]').length > 0) {
                     // Don't update if showing empty state
                 } else {
-                    $('.card-footer small').text(`Showing ${visibleRows} beneficiar${visibleRows !== 1 ? 'ies' : 'y'}`);
+                    $('.card-footer small').text(`Showing ${visibleRows} customer${visibleRows !== 1 ? 's' : ''}`);
                 }
             });
         }
 
-        function loadBeneficiaryModal(beneficiaryId) {
-            const url = beneficiaryId
-                ? '@Url.Action("GetBeneficiaryForEdit", "Beneficiary")?id=' + beneficiaryId
-                : '@Url.Action("GetBeneficiaryForm", "Beneficiary")';
+        function loadCustomerModal(customerId) {
+            const url = customerId
+                ? '@Url.Action("GetCustomerForEdit", "Customer")?id=' + customerId
+                : '@Url.Action("GetCustomerForm", "Customer")';
 
             $.ajax({
                 url: url,
                 type: 'GET',
                 success: function(response) {
-                    $('#beneficiaryModalContainer').html(response);
+                    $('#customerModalContainer').html(response);
 
                     // Show the modal
-                    const modalId = beneficiaryId ? '#editBeneficiaryModal' : '#addBeneficiaryModal';
+                    const modalId = customerId ? '#editCustomerModal' : '#addCustomerModal';
                     $(modalId).modal('show');
 
                     // Setup form submission
-                    setupFormSubmission(beneficiaryId);
+                    setupFormSubmission(customerId);
                 },
                 error: function() {
-                    showAlert('danger', 'Failed to load beneficiary form. Please try again.');
+                    showAlert('danger', 'Failed to load customer form. Please try again.');
                 }
             });
         }
 
-        function setupFormSubmission(beneficiaryId) {
-            const formId = beneficiaryId ? '#editBeneficiaryForm' : '#addBeneficiaryForm';
-            const actionUrl = beneficiaryId
-                ? '@Url.Action("UpdateBeneficiarys", "Beneficiary")'
-                : '@Url.Action("AddBeneficiary", "Beneficiary")';
-            const modalId = beneficiaryId ? '#editBeneficiaryModal' : '#addBeneficiaryModal';
+        function setupFormSubmission(customerId) {
+            const formId = customerId ? '#editCustomerForm' : '#addCustomerForm';
+            const actionUrl = customerId
+                ? '@Url.Action("UpdateCustomer", "Customer")'
+                : '@Url.Action("AddCustomer", "Customer")';
+            const modalId = customerId ? '#editCustomerModal' : '#addCustomerModal';
 
             $(formId).on('submit', function(e) {
                 e.preventDefault();
@@ -202,8 +198,8 @@
             });
         }
 
-        function editBeneficiary(beneficiaryId) {
-            loadBeneficiaryModal(beneficiaryId);
+        function editCustomer(customerId) {
+            loadCustomerModal(customerId);
         }
 
         function showAlert(type, message) {
