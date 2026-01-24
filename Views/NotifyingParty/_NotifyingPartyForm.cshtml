@@ -1,0 +1,222 @@
+﻿@model CommercialManagement.Models.Initial_Stage.NotifyingParty
+
+@{
+    bool isEdit = Model?.PartyID > 0;
+    string modalId = isEdit ? "editNotifyingPartyModal" : "addNotifyingPartyModal";
+    string formId = isEdit ? "editNotifyingPartyForm" : "addNotifyingPartyForm";
+    string modalTitle = isEdit ? "Edit Notifying Party" : "Add New Notifying Party";
+    string headerClass = isEdit ? "bg-warning text-dark" : "bg-primary text-white";
+    string iconClass = isEdit ? "bi-pencil-square" : "bi-plus-circle";
+    string btnClass = isEdit ? "btn-warning" : "btn-primary";
+    string btnText = isEdit ? "Update Notifying Party" : "Add Notifying Party";
+    string btnCloseClass = isEdit ? "" : "btn-close-white";
+}
+
+<div class="modal fade" id="@modalId" tabindex="-1" aria-labelledby="@(modalId)Label" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header @headerClass">
+                <h5 class="modal-title" id="@(modalId)Label">
+                    <i class="bi @iconClass me-2"></i>@modalTitle
+                </h5>
+                <button type="button" class="btn-close @btnCloseClass" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <form id="@formId" method="post">
+                <div class="modal-body">
+                    @if (isEdit)
+                    {
+                        <input type="hidden" name="PartyID" value="@Model.PartyID" />
+
+                        <div class="alert alert-info border-0 mb-0">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <small>Editing Notifying Party ID: <strong>@Model.PartyID</strong></small>
+                        </div>
+                    }
+
+                    <div class="mb-0">
+                        <label for="PartyCode" class="form-label">
+                            <i class="bi bi-upc-scan text-primary"></i> Party Code
+                            <span class="text-danger">*</span>
+                        </label>
+                        <input type="text"
+                               class="form-control"
+                               id="PartyCode"
+                               name="PartyCode"
+                               value="@(Model?.PartyCode ?? "")"
+                               required
+                               maxlength="50">
+                        <div class="invalid-feedback">
+                            Please provide a valid party code.
+                        </div>
+                        <small class="form-text text-muted">
+                            Enter a unique code for this notifying party (max 50 characters)
+                        </small>
+                    </div>
+
+                    <div class="mb-0">
+                        <label for="PartyName" class="form-label">
+                            <i class="bi bi-tag text-primary"></i> Party Name
+                            <span class="text-danger">*</span>
+                        </label>
+                        <input type="text"
+                               class="form-control"
+                               id="PartyName"
+                               name="PartyName"
+                               value="@(Model?.PartyName ?? "")"
+                               required
+                               maxlength="200">
+                        <div class="invalid-feedback">
+                            Please provide a valid party name.
+                        </div>
+                        <small class="form-text text-muted">
+                            Enter the name of the notifying party (max 200 characters)
+                        </small>
+                    </div>
+
+                    @if (isEdit && (Model.CreatedAt.HasValue))
+                    {
+                        <div class="border-top pt-3 mt-4">
+                            <h6 class="text-muted mb-3">
+                                <i class="bi bi-clock-history"></i> Record Information
+                            </h6>
+                            <div class="row g-3">
+                                @if (Model.CreatedAt.HasValue)
+                                {
+                                    <div class="col-md-6">
+                                        <small class="text-muted d-block mb-1">Created</small>
+                                        <div class="fw-medium">
+                                            @if (Model.CreatedAt.HasValue)
+                                            {
+                                                <div>@Model.CreatedAt.Value.ToString("MMM dd, yyyy HH:mm")</div>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle me-1"></i>Cancel
+                    </button>
+                    <button type="submit" class="btn @btnClass">
+                        <i class="bi bi-check-circle me-1"></i>@btnText
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Initialize form validation
+    (function() {
+        'use strict';
+
+        // Auto-focus first input when modal is shown
+        $('#@modalId').on('shown.bs.modal', function() {
+            $('#PartyCode').focus();
+        });
+
+        // Clear validation on modal hide
+        $('#@modalId').on('hidden.bs.modal', function() {
+            $('#@formId').removeClass('was-validated');
+            $('#@formId')[0].reset();
+        });
+
+        // Real-time validation feedback
+        $('#PartyCode, #PartyName').on('input', function() {
+            if ($(this).val().trim() !== '') {
+                $(this).removeClass('is-invalid').addClass('is-valid');
+            } else {
+                $(this).removeClass('is-valid').addClass('is-invalid');
+            }
+        });
+    })();
+</script>
+
+<style>
+    .modal-content {
+        border-radius: 12px;
+        border: none;
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
+
+    .modal-header {
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+        border-bottom: none;
+    }
+
+    .modal-body {
+    }
+
+    .modal-footer {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+        border-top: 1px solid #dee2e6;
+    }
+
+    .form-label {
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+    }
+
+    .form-control {
+        border-radius: 8px;
+        padding: 0.625rem 0.875rem;
+        border: 1px solid #ced4da;
+        transition: all 0.2s ease;
+    }
+
+        .form-control:focus {
+            border-color: #1b6ec2;
+            box-shadow: 0 0 0 0.2rem rgba(27, 110, 194, 0.25);
+        }
+
+        .form-control.is-valid {
+            border-color: #28a745;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%2328a745' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right calc(0.375em + 0.1875rem) center;
+            background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+            padding-right: calc(1.5em + 0.75rem);
+        }
+
+        .form-control.is-invalid {
+            border-color: #dc3545;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right calc(0.375em + 0.1875rem) center;
+            background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+            padding-right: calc(1.5em + 0.75rem);
+        }
+
+    .form-text {
+        font-size: 0.825rem;
+    }
+
+    .invalid-feedback {
+        font-size: 0.825rem;
+    }
+
+    .alert {
+        border-radius: 8px;
+    }
+
+    @@media (max-width: 576px) {
+        .modal-dialog
+
+    {
+        margin: 0.5rem;
+    }
+
+    .modal-body {
+    }
+
+    }
+</style>
