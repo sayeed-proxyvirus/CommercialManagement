@@ -73,6 +73,40 @@
                             Enter the name of the beneficiary (max 200 characters)
                         </small>
                     </div>
+                    <div class="mb-0">
+                        <label for="Remarks" class="form-label">
+                            <i class="bi bi-tag text-primary"></i> Beneficiary Remarks
+                            <span class="text-danger">*</span>
+                        </label>
+                        <input type="text"
+                               class="form-control"
+                               id="Remarks"
+                               name="Remarks"
+                               value="@(Model?.Remarks ?? "")"
+                               maxlength="200">
+                        <small class="form-text text-muted">
+                            Enter the remarks of the beneficiary (max 200 characters)
+                        </small>
+                    </div>
+                    <div class="mb-0">
+                        <label for="Address" class="form-label">
+                            <i class="bi bi-tag text-primary"></i> Address
+                            <span class="text-danger">*</span>
+                        </label>
+                        <input type="text"
+                               class="form-control"
+                               id="Address"
+                               name="Address"
+                               value="@(Model?.Address ?? "")"
+                               required
+                               maxlength="500">
+                        <div class="invalid-feedback">
+                            Please provide a valid beneficiary name.
+                        </div>
+                        <small class="form-text text-muted">
+                            Enter the address of the beneficiary (max 200 characters)
+                        </small>
+                    </div>
 
                     @if (isEdit && (Model.CreatedAt.HasValue))
                     {

@@ -42,6 +42,8 @@
                             <th class="px-4" style="width: 80px;">ID</th>
                             <th>Beneficiary Code</th>
                             <th>Beneficiary Name</th>
+                            <th>Remarks</th>
+                            <th>Address</th>
                             <th>Created At</th>
                             <th class="text-center" style="width: 100px;">Actions</th>
                         </tr>
@@ -57,6 +59,8 @@
                                         <span class="badge bg-secondary">@(item.BenCode ?? "-")</span>
                                     </td>
                                     <td class="fw-medium">@(item.BenName ?? "-")</td>
+                                    <td class="fw-medium">@(item.Remarks ?? "-")</td>
+                                    <td class="fw-medium">@(item.Address ?? "-")</td>
                                     <td class="text-muted">
                                         @(item.CreatedAt.HasValue ? item.CreatedAt.Value.ToString("MMM dd, yyyy") : "-")
                                     </td>
@@ -163,7 +167,7 @@
         function setupFormSubmission(beneficiaryId) {
             const formId = beneficiaryId ? '#editBeneficiaryForm' : '#addBeneficiaryForm';
             const actionUrl = beneficiaryId
-                ? '@Url.Action("UpdateBeneficiary", "Beneficiary")'
+                ? '@Url.Action("UpdateBeneficiarys", "Beneficiary")'
                 : '@Url.Action("AddBeneficiary", "Beneficiary")';
             const modalId = beneficiaryId ? '#editBeneficiaryModal' : '#addBeneficiaryModal';
 
