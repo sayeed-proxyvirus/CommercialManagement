@@ -1,0 +1,192 @@
+﻿@* Views/ExportMain/_GetLCInfo.cshtml *@
+@model List<CommercialManagement.Models.ViewModels.ExportMainViewModel>
+
+@{
+    var data = Model?.FirstOrDefault();
+}
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-light border-bottom d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="bi bi-file-earmark-text"></i> Export LC Details</h5>
+        <button type="button" class="btn-close" onclick="closeDetails()"></button>
+    </div>
+    <div class="card-body">
+        <form id="exportLCForm">
+            <div class="row g-3">
+                <!-- Left Column -->
+                <div class="col-md-6">
+                    <!-- Export LC No -->
+                    <div class="mb-3">
+                        <label for="exportLCNo" class="form-label fw-semibold">EXPORT L/C NO:</label>
+                        <input type="text" class="form-control" id="exportLCNo"
+                               value="@(data?.MainExpName ?? "")" readonly style="background-color: #e9ecef;">
+                    </div>
+
+                    <!-- L/C Date -->
+                    <div class="mb-3">
+                        <label for="lcDate" class="form-label fw-semibold">L/C DATE:</label>
+                        <input type="date" class="form-control" id="lcDate"
+                               value="@(data?.LCDate?.ToString("yyyy-MM-dd") ?? "")" readonly style="background-color: #e9ecef;">
+                    </div>
+
+                    <!-- Total Value -->
+                    <div class="mb-3">
+                        <label for="totalValue" class="form-label fw-semibold">TOTAL VALUE $</label>
+                        <input type="text" class="form-control fw-bold text-primary" id="totalValue"
+                               value="@(data?.TotalValue?.ToString("N2") ?? "")" readonly
+                               style="background-color: #007bff; color: white !important; font-size: 1.1rem;">
+                    </div>
+
+                    <!-- Reference # -->
+                    <div class="mb-3">
+                        <label for="referenceNo" class="form-label fw-semibold">Reference #</label>
+                        <input type="text" class="form-control" id="referenceNo"
+                               value="@(data?.Reference ?? "")" readonly style="background-color: #e9ecef;">
+                    </div>
+                </div>
+
+                <!-- Right Column -->
+                <div class="col-md-6">
+                    <!-- LC Applicant -->
+                    <div class="mb-3">
+                        <label for="lcApplicant" class="form-label fw-semibold">LC APPLICANT</label>
+                        <select class="form-select" id="lcApplicant" disabled>
+                            <option value="">-- Select Applicant --</option>
+                            @if (ViewBag.ListApplicant != null)
+                            {
+                                foreach (var applicant in ViewBag.ListApplicant)
+                                {
+                                    <option value="@applicant.AppConsId"
+                                            selected="@(applicant.AppConsId == data?.ApplicantID)">
+                                        @applicant.AppConsName
+                                    </option>
+                                }
+                            }
+                        </select>
+                    </div>
+
+                    <!-- Beneficiary -->
+                    <div class="mb-3">
+                        <label for="beneficiary" class="form-label fw-semibold">BENEFICIARY</label>
+                        <select class="form-select" id="beneficiary" disabled>
+                            <option value="">-- Select Beneficiary --</option>
+                            @if (ViewBag.ListBeneficiary != null)
+                            {
+                                foreach (var beneficiary in ViewBag.ListBeneficiary)
+                                {
+                                    <option value="@beneficiary.BeneficiaryId"
+                                            selected="@(beneficiary.BeneficiaryId == data?.BenID)">
+                                        @beneficiary.BeneficiaryName
+                                    </option>
+                                }
+                            }
+                        </select>
+                    </div>
+
+                    <!-- Notify -->
+                    <div class="mb-3">
+                        <label for="notify" class="form-label fw-semibold">NOTIFY</label>
+                        <select class="form-select" id="notify" disabled>
+                            <option value="">-- Select Notify Party --</option>
+                            @if (ViewBag.ListNotify != null)
+                            {
+                                foreach (var notify in ViewBag.ListNotify)
+                                {
+                                    <option value="@notify.NotifingPartyId"
+                                            selected="@(notify.NotifingPartyId == data?.PartyID)">
+                                        @notify.NotifyingPartyName
+                                    </option>
+                                }
+                            }
+                        </select>
+                    </div>
+
+                    <!-- Ship Date -->
+                    <div class="mb-3">
+                        <label for="shipDate" class="form-label fw-semibold">SHIP DATE:</label>
+                        <input type="date" class="form-control" id="shipDate"
+                               value="@(data?.ShipDate?.ToString("yyyy-MM-dd") ?? "")" readonly style="background-color: #e9ecef;">
+                    </div>
+
+                    <!-- Destination -->
+                    <div class="mb-3">
+                        <label for="destination" class="form-label fw-semibold">DESTINATION</label>
+                        <input type="text" class="form-control" id="destination"
+                               value="@(data?.Destination ?? "")" readonly style="background-color: #e9ecef;">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="row mt-4">
+                <div class="col-12 d-flex justify-content-end gap-2">
+                    <button type="button" class="btn btn-secondary" onclick="closeDetails()">
+                        <i class="bi bi-x-circle"></i> Close
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="editLC()">
+                        <i class="bi bi-pencil"></i> Edit
+                    </button>
+                    <button type="button" class="btn btn-success" onclick="saveLC()">
+                        <i class="bi bi-save"></i> Save
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function editLC() {
+        // Enable all form fields for editing
+        $('#exportLCForm').find('input:not(#exportLCNo), select').prop('disabled', false)
+            .css('background-color', '');
+        $('#exportLCForm').find('input[readonly]').prop('readonly', false)
+            .css('background-color', '');
+
+        showAlert('info', 'Edit mode enabled. Modify the fields and click Save.');
+    }
+
+    function saveLC() {
+        // Collect form data
+        const formData = {
+            MainExpName: $('#exportLCNo').val(),
+            ReceiveDate: $('#lcDate').val(),
+            Dollars: $('#totalValue').val().replace(/,/g, ''),
+            ReferenceNo: $('#referenceNo').val(),
+            ApplicantId: $('#lcApplicant').val(),
+            BeneficiaryId: $('#beneficiary').val(),
+            NotifyId: $('#notify').val(),
+            ExpDate: $('#shipDate').val(),
+            Destination: $('#destination').val()
+        };
+
+        // Add save logic here
+        console.log('Saving LC:', formData);
+        showAlert('success', 'Export LC saved successfully!');
+
+        // Disable fields after save
+        $('#exportLCForm').find('input, select').prop('disabled', true)
+            .css('background-color', '#e9ecef');
+    }
+</script>
+
+<style>
+    .form-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        color: #000;
+        margin-bottom: 0.25rem;
+    }
+
+    .form-control:disabled,
+    .form-select:disabled {
+        background-color: #e9ecef;
+        cursor: not-allowed;
+    }
+
+    #totalValue {
+        background-color: #007bff !important;
+        color: white !important;
+        border-color: #007bff !important;
+    }
+</style>

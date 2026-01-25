@@ -140,10 +140,25 @@
                 $('#lcDate').val(val ? $(this).find(':selected').data('lcdate') : '');
             });
 
-            $('#btnSearch').click(function() {
-                const lc = $('#lcSearch').val();
-                if (lc) loadDetails(lc, 'edit');
-            });
+        $('#btnSearch').click(function() {
+            const lcName = $('#lcSearch').val();
+            if (lcName) {
+                $('#detailsContainer').html('<div class="text-center py-4"><div class="spinner-border"></div></div>');
+                $('html, body').animate({ scrollTop: $('#detailsContainer').offset().top - 20 }, 400);
+
+                $.ajax({
+                    url: '@Url.Action("GetLCInfo", "ExportMain")',
+                    type: 'POST',
+                    data: { LCName: lcName },
+                    success: function(html) {
+                        $('#detailsContainer').html(html);
+                    },
+                    error: function() {
+                        $('#detailsContainer').html('<div class="alert alert-danger">Failed to load LC details</div>');
+                    }
+                });
+            }
+        });
 
             $('#btnAdd').click(() => loadDetails('', 'add'));
 

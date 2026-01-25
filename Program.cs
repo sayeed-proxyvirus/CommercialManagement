@@ -7,6 +7,8 @@ using SAMLitigation.Services;
 using SAMLitigation.Services.ServiceImple;
 using Microsoft.EntityFrameworkCore;
 using CommercialManagement.Services.Logins.LoginServices;
+using CommercialManagement.Services.DropDownSerivces;
+using CommercialManagement.Services.DropDownSerivces.DropDownSerivceImple;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,6 +42,7 @@ builder.Services.AddScoped<PartyService, PartyServiceImple>();
 builder.Services.AddScoped<FabricsService, FabricsServiceImple>();
 builder.Services.AddScoped<DynamicMenuService, DynamicMenuServiceImple>();
 builder.Services.AddScoped<ExportDataService, ExportDataServiceImple>();
+builder.Services.AddScoped<DropDownService, DropDownServiceImple>();
 //builder.Services.AddScoped<ExportInvoiceService, ExportInvoiceServiceImple>();
 builder.Services.AddScoped<ExportMainService, ExportMainServiceImple>();
 builder.Services.AddScoped<ExportLCItemsService, ExportLCItemsServiceImple>();
