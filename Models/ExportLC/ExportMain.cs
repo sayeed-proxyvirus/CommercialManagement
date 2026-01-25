@@ -7,6 +7,9 @@ namespace CommercialManagement.Models.ExpLC
     public class ExportMain
     {
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Column("ExpID")]
+        public int ExpID { get; set; }
         [Column("MainExpName")]
         public string MainExpName { get; set; }
         [Column("ReceiveDate")]
