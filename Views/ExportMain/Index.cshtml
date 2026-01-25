@@ -1,132 +1,77 @@
-﻿@model List<CommercialManagement.Models.ExpLC.ExportMain>
+﻿@* Views/ExportMain/Index.cshtml *@
+@model List<CommercialManagement.Models.ExpLC.ExportMain>
 @{
     ViewData["Title"] = "Export LC Management";
 }
 
 <div class="container-fluid">
-    <!-- Alert Messages -->
     <div id="alertContainer"></div>
 
-    <!-- Export LC Control Panel -->
+    <!-- Search Panel -->
     <div class="card shadow-sm border-0 mb-4">
-        <div class="card-body">
-            <div class="row align-items-center g-3">
-                <!-- Search LC Dropdown -->
-                <div class="col-md-5">
-                    <label for="lcSearch" class="form-label fw-semibold">
-                        <i class="bi bi-search"></i> Search Export LC
-                    </label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-light">
-                            <i class="bi bi-file-earmark-text"></i>
-                        </span>
-                        <select class="form-select" id="lcSearch" name="lcSearch">
-                            <option value="">-- Select an Export LC --</option>
-                            @if (Model != null && Model.Any())
-                            {
-                                foreach (var lc in Model)
-                                {
-                                    <option value="@lc.MainExpName">
-                                        @lc.MainExpName
-                                        @if (lc.ReceiveDate.HasValue)
-                                        {
-                                            <text> - @lc.ReceiveDate.Value.ToString("dd MMM yyyy")</text>
-                                        }
-                                    </option>
-                                }
-                            }
-                        </select>
-                    </div>
-                    <small class="form-text text-muted">
-                        Select an LC to view details
-                    </small>
-                </div>
-
-                <!-- Action Buttons -->
-                <div class="col-md-7">
-                    <div class="d-flex gap-2">
-                        <!-- Search Button -->
-                        <button type="button"
-                                class="btn btn-primary btn-lg shadow-sm flex-grow-1"
-                                id="btnSearchLC"
-                                disabled>
-                            <i class="bi bi-search me-2"></i>Search LC Details
-                        </button>
-
-                        <!-- Add New LC Button -->
-                        <button type="button"
-                                class="btn btn-success btn-lg shadow-sm"
-                                id="btnAddNewLC">
-                            <i class="bi bi-plus-circle me-2"></i>Add New LC
-                        </button>
-                    </div>
-                </div>
-            </div>
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="bi bi-file-earmark-text"></i> Export LC Management</h5>
         </div>
-    </div>
-
-    <!-- Export LC Details Section (Hidden initially) -->
-    <div id="lcDetailsSection" style="display: none;">
-        <div class="card shadow-sm border-0">
-            <div class="card-header bg-primary text-white">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">
-                        <i class="bi bi-file-earmark-text"></i>
-                        Export LC Details
-                    </h5>
-                    <button type="button" class="btn btn-sm btn-light" id="btnCloseDetails">
-                        <i class="bi bi-x-circle"></i> Close
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label for="lcSearch" class="form-label fw-semibold">
+                        <i class="bi bi-search"></i> EXPORT L/C NO:
+                    </label>
+                    <select class="form-select" id="lcSearch">
+                        <option value="">-- Select Export LC --</option>
+                        @if (Model != null && Model.Any())
+                        {
+                            foreach (var lc in Model)
+                            {
+                                <option value="@lc.MainExpName"
+                                        data-lcdate="@(lc.ReceiveDate?.ToString("yyyy-MM-dd"))">
+                                    @lc.MainExpName
+                                </option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex align-items-end gap-2">
+                    <button type="button" class="btn btn-primary flex-grow-1" id="btnSearch" disabled>
+                        <i class="bi bi-search"></i> Search
+                    </button>
+                    <button type="button" class="btn btn-success" id="btnAdd">
+                        <i class="bi bi-plus-circle"></i> Add
                     </button>
                 </div>
             </div>
-            <div class="card-body">
-                <!-- LC Details will be loaded here -->
-                <div id="lcDetailsContent">
-                    <div class="text-center py-5">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
-                        <p class="mt-3 text-muted">Loading LC details...</p>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 
-    <!-- Export LC Table Card -->
-    <div class="card shadow-sm border-0 mt-4">
+    <!-- Partial View Container -->
+    <div id="detailsContainer"></div>
+
+    <!-- Export LCs Table -->
+    <div class="card shadow-sm border-0">
         <div class="card-header bg-white border-bottom">
             <div class="row align-items-center">
                 <div class="col-md-6">
-                    <h5 class="mb-0">
-                        <i class="bi bi-list-ul"></i> All Export LCs
-                    </h5>
+                    <h5 class="mb-0"><i class="bi bi-list-ul"></i> All Export LCs</h5>
                 </div>
                 <div class="col-md-6">
-                    <div class="input-group">
-                        <span class="input-group-text bg-light border-end-0">
-                            <i class="bi bi-funnel"></i>
-                        </span>
-                        <input type="text"
-                               class="form-control border-start-0"
-                               id="tableSearchInput"
-                               placeholder="Filter table by LC name, destination...">
-                    </div>
+                    <input type="text" class="form-control" id="tableFilter"
+                           placeholder="Filter table...">
                 </div>
             </div>
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0" id="exportLCTable">
+                <table class="table table-hover mb-0" id="lcTable">
                     <thead class="table-light">
                         <tr>
-                            <th class="px-4">LC Name</th>
-                            <th>Receive Date</th>
-                            <th>Export Date</th>
+                            <th>LC Name</th>
+                            <th>LC Date</th>
+                            <th>Ship Date</th>
                             <th>Amount (USD)</th>
                             <th>Quantity</th>
                             <th>Destination</th>
-                            <th class="text-center" style="width: 120px;">Actions</th>
+                            <th class="text-center" style="width:80px;">Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -135,15 +80,9 @@
                             foreach (var item in Model)
                             {
                                 <tr>
-                                    <td class="px-4 fw-semibold text-primary">
-                                        @(item.MainExpName ?? "-")
-                                    </td>
-                                    <td class="text-muted">
-                                        @(item.ReceiveDate.HasValue ? item.ReceiveDate.Value.ToString("dd MMM yyyy") : "-")
-                                    </td>
-                                    <td class="text-muted">
-                                        @(item.ExpDate.HasValue ? item.ExpDate.Value.ToString("dd MMM yyyy") : "-")
-                                    </td>
+                                    <td class="fw-semibold text-primary">@(item.MainExpName ?? "-")</td>
+                                    <td>@(item.ReceiveDate?.ToString("dd/MM/yyyy") ?? "-")</td>
+                                    <td>@(item.ExpDate?.ToString("dd/MM/yyyy") ?? "-")</td>
                                     <td>
                                         @if (item.Dollars.HasValue)
                                         {
@@ -154,25 +93,12 @@
                                             <span>-</span>
                                         }
                                     </td>
-                                    <td>
-                                        @(item.ExpQuanity.HasValue ? item.ExpQuanity.Value.ToString("N0") : "-")
-                                    </td>
-                                    <td>
-                                        <i class="bi bi-geo-alt text-primary"></i>
-                                        @(item.Destination ?? "-")
-                                    </td>
+                                    <td>@(item.ExpQuanity?.ToString("N0") ?? "-")</td>
+                                    <td><i class="bi bi-geo-alt text-primary"></i> @(item.Destination ?? "-")</td>
                                     <td class="text-center">
-                                        <button type="button"
-                                                class="btn btn-sm btn-outline-primary"
-                                                onclick="viewLCDetails('@item.MainExpName')"
-                                                title="View Details">
+                                        <button type="button" class="btn btn-sm btn-outline-primary"
+                                                onclick="viewLC('@item.MainExpName')">
                                             <i class="bi bi-eye"></i>
-                                        </button>
-                                        <button type="button"
-                                                class="btn btn-sm btn-outline-warning"
-                                                onclick="editLC('@item.MainExpName')"
-                                                title="Edit LC">
-                                            <i class="bi bi-pencil"></i>
                                         </button>
                                     </td>
                                 </tr>
@@ -181,12 +107,9 @@
                         else
                         {
                             <tr>
-                                <td colspan="7" class="text-center py-5 text-muted">
-                                    <i class="bi bi-inbox fs-1 d-block mb-3"></i>
-                                    <p class="mb-0">No Export LCs found</p>
-                                    <button class="btn btn-success mt-3" id="btnAddFirstLC">
-                                        <i class="bi bi-plus-circle me-2"></i>Add Your First Export LC
-                                    </button>
+                                <td colspan="7" class="text-center py-4 text-muted">
+                                    <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                                    No Export LCs found
                                 </td>
                             </tr>
                         }
@@ -194,303 +117,98 @@
                 </table>
             </div>
         </div>
-        @if (Model != null && Model.Any())
+        @if (Model?.Count > 0)
         {
             <div class="card-footer bg-white border-top">
-                <div class="d-flex justify-content-between align-items-center">
-                    <small class="text-muted">
-                        Showing @Model.Count Export LC@(Model.Count != 1 ? "s" : "")
-                    </small>
-                    <small class="text-muted">
-                        Total Value:
-                        <strong class="text-success">
-                            $@Model.Where(x => x.Dollars.HasValue).Sum(x => x.Dollars.Value).ToString("N2")
-                        </strong>
-                    </small>
-                </div>
+                <small class="text-muted">
+                    Showing <span id="count">@Model.Count</span> Export LCs |
+                    Total: <strong class="text-success">
+                        $@Model.Where(x => x.Dollars.HasValue).Sum(x => x.Dollars.Value).ToString("N2")
+                    </strong>
+                </small>
             </div>
         }
     </div>
 </div>
 
-<!-- Modal Container for Partial Views -->
-<div id="exportLCModalContainer"></div>
-
 @section Scripts {
     <script>
         $(document).ready(function() {
-            initializePage();
+            $('#lcSearch').change(function() {
+                const val = $(this).val();
+                $('#btnSearch').prop('disabled', !val);
+                $('#lcDate').val(val ? $(this).find(':selected').data('lcdate') : '');
+            });
+
+            $('#btnSearch').click(function() {
+                const lc = $('#lcSearch').val();
+                if (lc) loadDetails(lc, 'edit');
+            });
+
+            $('#btnAdd').click(() => loadDetails('', 'add'));
+
+            $('#tableFilter').keyup(function() {
+                const term = $(this).val().toLowerCase();
+                $('#lcTable tbody tr').each(function() {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(term) > -1);
+                });
+            });
         });
 
-        function initializePage() {
-            setupEventListeners();
-            setupTableSearch();
-            setupSelect2(); // Optional: for better dropdown
-        }
+        function loadDetails(lcName, mode) {
+            $('#detailsContainer').html('<div class="text-center py-4"><div class="spinner-border"></div></div>');
+            $('html, body').animate({ scrollTop: $('#detailsContainer').offset().top - 20 }, 400);
 
-        function setupEventListeners() {
-            // Enable/disable search button based on dropdown selection
-            $('#lcSearch').on('change', function() {
-                const selectedLC = $(this).val();
-                $('#btnSearchLC').prop('disabled', !selectedLC);
-
-                if (selectedLC) {
-                    $('#btnSearchLC').removeClass('btn-secondary').addClass('btn-primary');
-                } else {
-                    $('#btnSearchLC').removeClass('btn-primary').addClass('btn-secondary');
-                }
-            });
-
-            // Search LC button click
-            $('#btnSearchLC').on('click', function() {
-                const selectedLC = $('#lcSearch').val();
-                if (selectedLC) {
-                    searchLCDetails(selectedLC);
-                } else {
-                    showAlert('warning', 'Please select an Export LC first');
-                }
-            });
-
-            // Add New LC button click
-            $('#btnAddNewLC, #btnAddFirstLC').on('click', function() {
-                loadAddLCModal();
-            });
-
-            // Close details button
-            $('#btnCloseDetails').on('click', function() {
-                $('#lcDetailsSection').slideUp();
-                $('#lcSearch').val('').trigger('change');
-            });
-
-            // Enter key on dropdown triggers search
-            $('#lcSearch').on('keypress', function(e) {
-                if (e.which === 13 && $(this).val()) {
-                    $('#btnSearchLC').click();
-                }
+            $.get('@Url.Action("GetExportMainDetails", "ExportMain")', { lcName, mode }, function(html) {
+                $('#detailsContainer').html(html);
+            }).fail(() => {
+                $('#detailsContainer').html('<div class="alert alert-danger">Failed to load</div>');
             });
         }
 
-        function setupTableSearch() {
-            $('#tableSearchInput').on('keyup', function() {
-                const searchTerm = $(this).val().toLowerCase();
-
-                $('#exportLCTable tbody tr').each(function() {
-                    const rowText = $(this).text().toLowerCase();
-                    $(this).toggle(rowText.indexOf(searchTerm) > -1);
-                });
-
-                // Update count
-                const visibleRows = $('#exportLCTable tbody tr:visible').length;
-                if (visibleRows > 0 && !$('#exportLCTable tbody tr:visible td[colspan]').length) {
-                    $('.card-footer small').first().text(`Showing ${visibleRows} Export LC${visibleRows !== 1 ? 's' : ''}`);
-                }
-            });
+        function viewLC(name) {
+            $('#lcSearch').val(name).change();
+            $('#btnSearch').click();
         }
 
-        function setupSelect2() {
-            // Optional: Use Select2 for better dropdown experience
-            // Uncomment if you want to use Select2 library
-            /*
-            if (typeof $.fn.select2 !== 'undefined') {
-                $('#lcSearch').select2({
-                    placeholder: '-- Select an Export LC --',
-                    allowClear: true,
-                    width: '100%'
-                });
-            }
-            */
+        function closeDetails() {
+            $('#detailsContainer').slideUp(400, () => $('#detailsContainer').empty());
+            $('#lcSearch').val('').change();
         }
 
-        function searchLCDetails(lcName) {
-            // Show loading state
-            $('#lcDetailsSection').slideDown();
-            $('#lcDetailsContent').html(`
-                <div class="text-center py-5">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                    <p class="mt-3 text-muted">Loading details for <strong>${lcName}</strong>...</p>
+        function reloadPage() {
+            location.reload();
+        }
+
+        function showAlert(type, msg) {
+            const icons = { success: 'check-circle', danger: 'exclamation-triangle', warning: 'exclamation-circle' };
+            $('#alertContainer').html(`
+                <div class="alert alert-${type} alert-dismissible fade show">
+                    <i class="bi bi-${icons[type]}"></i> ${msg}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             `);
-
-            // TODO: You'll implement this later
-            // Make AJAX call to get LC details
-            $.ajax({
-                url: '@Url.Action("SearchLCDetails", "ExportMain")',
-                type: 'POST',
-                data: { lcName: lcName },
-                success: function(response) {
-                    $('#lcDetailsContent').html(response);
-                },
-                error: function() {
-                    $('#lcDetailsContent').html(`
-                        <div class="alert alert-danger">
-                            <i class="bi bi-exclamation-triangle me-2"></i>
-                            Failed to load LC details. Please try again.
-                        </div>
-                    `);
-                }
-            });
-
-            // Scroll to details
-            $('html, body').animate({
-                scrollTop: $('#lcDetailsSection').offset().top - 100
-            }, 500);
-        }
-
-        function loadAddLCModal() {
-            // TODO: You'll implement this later///
-            $.ajax({
-                url: '@Url.Action("GetAddLCForm", "ExportMain")',
-                type: 'GET',
-                success: function(response) {
-                    $('#exportLCModalContainer').html(response);
-                    $('#addExportLCModal').modal('show');
-                },
-                error: function() {
-                    showAlert('danger', 'Failed to load form. Please try again.');
-                }
-            });
-        }
-
-        function viewLCDetails(lcName) {
-            $('#lcSearch').val(lcName).trigger('change');
-            $('#btnSearchLC').click();
-        }
-
-        function editLC(lcName) {
-            // TODO: You'll implement this later////
-            showAlert('info', `Edit functionality for ${lcName} - Coming soon!`);
-        }
-
-        function showAlert(type, message) {
-            const iconMap = {
-                'success': 'check-circle',
-                'danger': 'exclamation-triangle',
-                'warning': 'exclamation-circle',
-                'info': 'info-circle'
-            };
-
-            const alertHtml = `
-                <div class="alert alert-${type} alert-dismissible fade show shadow-sm" role="alert">
-                    <i class="bi bi-${iconMap[type] || 'info-circle'} me-2"></i>
-                    ${message}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            `;
-
-            $('#alertContainer').html(alertHtml);
-
-            // Auto dismiss after 5 seconds
-            setTimeout(() => {
-                $('.alert').fadeOut('slow', function() {
-                    $(this).remove();
-                });
-            }, 5000);
-
-            // Scroll to alert
-            $('html, body').animate({
-                scrollTop: $('#alertContainer').offset().top - 100
-            }, 300);
+            setTimeout(() => $('.alert').fadeOut(), 5000);
         }
     </script>
 }
 
 <style>
-    .card {
-        border-radius: 12px;
-        transition: box-shadow 0.3s ease;
-    }
-
-        .card:hover {
-            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1) !important;
-        }
-
     .table thead th {
-        font-weight: 600;
-        text-transform: uppercase;
         font-size: 0.75rem;
-        letter-spacing: 0.5px;
+        text-transform: uppercase;
         color: #6c757d;
-        border-bottom: 2px solid #dee2e6;
     }
 
     .table tbody tr {
-        transition: background-color 0.2s ease;
+        transition: background-color 0.2s;
     }
 
         .table tbody tr:hover {
             background-color: #f8f9fa;
         }
 
-    .btn-outline-primary:hover,
-    .btn-outline-warning:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    }
-
-    .badge {
-        padding: 0.5em 0.75em;
-        font-weight: 500;
-        font-size: 0.85rem;
-    }
-
-    .input-group-text {
-        background-color: #f8f9fa;
-    }
-
-    .form-select:focus,
-    .form-control:focus,
-    .input-group:focus-within .form-control {
-        border-color: #1b6ec2;
-        box-shadow: 0 0 0 0.2rem rgba(27, 110, 194, 0.25);
-    }
-
-    .input-group:focus-within .input-group-text {
-        border-color: #1b6ec2;
-    }
-
-    #btnSearchLC:disabled {
-        cursor: not-allowed;
-        opacity: 0.6;
-    }
-
-    .btn-lg {
-        padding: 0.75rem 1.5rem;
-        font-size: 1rem;
-    }
-
-    #lcDetailsSection {
-        animation: slideDown 0.3s ease;
-    }
-
-    @@keyframes slideDown {
-        from {
-            opacity: 0;
-            transform: translateY(-20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    @@media (max-width: 768px) {
-        .table {
-            font-size: 0.875rem;
-        }
-
-        .btn-lg {
-            font-size: 0.9rem;
-            padding: 0.5rem 1rem;
-        }
-
-        .d-flex.gap-2 {
-            flex-direction: column;
-        }
-
-        .flex-grow-1 {
-            width: 100%;
-        }
+    .btn:hover {
+        transform: translateY(-1px);
     }
 </style>
