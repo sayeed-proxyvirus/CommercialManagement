@@ -7,7 +7,7 @@ namespace CommercialManagement.Services.Exports
     public interface ExportMainService
     {
         List<ExportMainViewModel> GetExportMain(string ExpLCName);
-        List<ExportMain> GetExportMainLCs();
+        //List<ExportMain> GetExportMainLCs();
         bool AddExportMain(ExportMain exportMain);
         bool UpdateExportMain(ExportMain exportMain);
         ExportMainViewModel GetbyId(int Id);

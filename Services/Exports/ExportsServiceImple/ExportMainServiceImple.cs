@@ -48,21 +48,7 @@ namespace CommercialManagement.Services.Exports.ExportsServiceImple
                 throw; ;
             }
         }
-        public List<ExportMain> GetExportMainLCs()
-        {
-            try
-            {
-                //var param = new SqlParameter("@ExpLCName", ExpLCName);
-                var exportMainViewModel = _context.ExportMain
-                    .FromSqlRaw("EXEC usp_ViewExpLC")
-                    .ToList();
-                return exportMainViewModel;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
+
 
         public bool UpdateExportMain(ExportMain exportMain)
         {
