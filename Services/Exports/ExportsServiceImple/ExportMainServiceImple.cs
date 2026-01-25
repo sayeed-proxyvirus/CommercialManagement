@@ -45,7 +45,7 @@ namespace CommercialManagement.Services.Exports.ExportsServiceImple
             }
             catch (Exception)
             {
-                throw;
+                throw; ;
             }
         }
 
