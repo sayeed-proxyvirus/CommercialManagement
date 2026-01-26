@@ -86,8 +86,9 @@
             <div class="card-footer bg-white border-top">
                 <div class="d-flex justify-content-between align-items-center">
                     <small class="text-muted">
-                        Showing
+                        Showing <span id="pageInfo">1 to @Math.Min(10, Model.Count) of @Model.Count</span> entries
                     </small>
+                    <div id="paginationContainer"></div>
                 </div>
             </div>
         }
@@ -106,7 +107,7 @@
             </div>
             <form id="contactForm">
                 <div class="modal-body">
-                    <!-- ContactID -->
+                    <!--- ContactID -->
                     <input type="hidden" id="contactId" name="ContactId" value="0" />
 
                     <!-- Export LC No -->
@@ -162,32 +163,10 @@
     </div>
 </div>
 
-
-<!-- jQuery MUST be loaded first -->
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-
-<!-- Then Bootstrap -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-<!-- Then DataTables -->
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 <script>
     $(document).ready(function() {
-        // Initialize DataTable with pagination
-        $('#contactTable').DataTable({
-            pageLength: 15,
-            order: [[0, "asc"]],
-            searching: false,
-            lengthChange: false,
-            info: true,
-            paging: true,
-            language: {
-                emptyTable: "No contact details found"
-            }
-        });
+        initializeContactPagination();
 
-        // Handle contact form submission
         $('#contactForm').on('submit', function(e) {
             e.preventDefault();
             if (!validateContactForm()) return false;
@@ -196,6 +175,113 @@
             contactId && contactId !== '0' ? updateContact() : addContact();
         });
     });
+
+    // Pagination variables
+    let contactCurrentPage = 1;
+    const contactRowsPerPage = 15;
+    let contactAllRows = [];
+
+    function initializeContactPagination() {
+        contactAllRows = $('#contactTableBody tr').toArray();
+        if (contactAllRows.length > 0) {
+            displayContactPage();
+        }
+    }
+
+    function displayContactPage() {
+        const totalPages = Math.ceil(contactAllRows.length / contactRowsPerPage);
+        const start = (contactCurrentPage - 1) * contactRowsPerPage;
+        const end = start + contactRowsPerPage;
+
+        // Show/hide rows
+        contactAllRows.forEach((row, index) => {
+            $(row).toggle(index >= start && index < end);
+        });
+
+        // Update footer and pagination
+        updateContactFooter(start, end);
+        renderContactPagination(totalPages);
+        updateVisibleTotals();
+    }
+
+    function updateContactFooter(start, end) {
+        const total = contactAllRows.length;
+        const displayStart = total > 0 ? start + 1 : 0;
+        const displayEnd = Math.min(end, total);
+        $('#pageInfo').text(`${displayStart} to ${displayEnd} of ${total}`);
+    }
+
+    function renderContactPagination(totalPages) {
+        if (totalPages <= 1) {
+            $('#paginationContainer').empty();
+            return;
+        }
+
+        const createPageItem = (page, text, disabled = false, active = false) => {
+            const disabledClass = disabled ? 'disabled' : '';
+            const activeClass = active ? 'active' : '';
+            const onclick = !disabled && !active ? `onclick="changeContactPage(${page}); return false;"` : '';
+            return `<li class="page-item ${disabledClass} ${activeClass}">
+                        <a class="page-link" href="#" ${onclick}>${text}</a>
+                    </li>`;
+        };
+
+        let html = '<nav><ul class="pagination pagination-sm mb-0">';
+
+        // Previous button
+        html += createPageItem(contactCurrentPage - 1, '<i class="bi bi-chevron-left"></i>', contactCurrentPage === 1);
+
+        // Page numbers
+        const maxPages = 5;
+        let startPage = Math.max(1, contactCurrentPage - Math.floor(maxPages / 2));
+        let endPage = Math.min(totalPages, startPage + maxPages - 1);
+
+        if (endPage - startPage < maxPages - 1) {
+            startPage = Math.max(1, endPage - maxPages + 1);
+        }
+
+        if (startPage > 1) {
+            html += createPageItem(1, '1');
+            if (startPage > 2) html += '<li class="page-item disabled"><span class="page-link">...</span></li>';
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+            html += createPageItem(i, i, false, i === contactCurrentPage);
+        }
+
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) html += '<li class="page-item disabled"><span class="page-link">...</span></li>';
+            html += createPageItem(totalPages, totalPages);
+        }
+
+        // Next button
+        html += createPageItem(contactCurrentPage + 1, '<i class="bi bi-chevron-right"></i>', contactCurrentPage === totalPages);
+
+        html += '</ul></nav>';
+        $('#paginationContainer').html(html);
+    }
+
+    function changeContactPage(page) {
+        const totalPages = Math.ceil(contactAllRows.length / contactRowsPerPage);
+        if (page < 1 || page > totalPages) return;
+        contactCurrentPage = page;
+        displayContactPage();
+    }
+
+    function updateVisibleTotals() {
+        let totalPcs = 0;
+        let totalAmount = 0;
+
+        $('#contactTableBody tr:visible').each(function() {
+            const pcs = parseInt($(this).find('td:eq(2)').text().replace(/,/g, '')) || 0;
+            const amount = parseFloat($(this).find('td:eq(4)').text().replace(/,/g, '')) || 0;
+            totalPcs += pcs;
+            totalAmount += amount;
+        });
+
+        $('#totalPcs').text(totalPcs.toLocaleString());
+        $('#totalPrice').text(totalAmount.toFixed(2));
+    }
 
     // Open Add Contact Modal
     function openAddContactModal() {
@@ -268,7 +354,6 @@
             TotalPcs: parseInt($('#contactTotalPcs').val()),
             TotalPrice: parseFloat($('#contactTotalPrice').val())
         };
-        console.log(formData);
 
         $('#btnSaveContact').prop('disabled', true)
             .html('<span class="spinner-border spinner-border-sm me-2"></span>Saving...');
@@ -311,7 +396,7 @@
             TotalPcs: parseInt($('#contactTotalPcs').val()),
             TotalPrice: parseFloat($('#contactTotalPrice').val())
         };
-
+        console.log(formData);
         $('#btnSaveContact').prop('disabled', true)
             .html('<span class="spinner-border spinner-border-sm me-2"></span>Updating...');
 
