@@ -2,6 +2,7 @@
 {
     public class ExportLCViewModel
     {
+        public int ContactId { get; set; }
         public string? ExpLCNo { get; set; }
         public string? ContactNo { get; set; }
         public string? StyleDesc { get; set; }

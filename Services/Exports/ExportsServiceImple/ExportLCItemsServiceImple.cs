@@ -33,7 +33,7 @@ namespace CommercialManagement.Services.Exports.ExportsServiceImple
             try
             {
                 var exportLC = _context.ExportLCItems
-                    .FirstOrDefault(c => c.ExpID == Id);
+                    .FirstOrDefault(c => c.ContactId == Id);
                 return exportLC;
             }
             catch (Exception)

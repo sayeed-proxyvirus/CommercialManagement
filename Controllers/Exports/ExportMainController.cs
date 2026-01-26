@@ -204,7 +204,7 @@ namespace CommercialManagement.Controllers.Exports
             try
             {
                 var userName = HttpContext.Session.GetString("UserName") ?? "System";
-                var existingLCContact = _exportLCItemsService.GetbyId(formData.ExpID);
+                var existingLCContact = _exportLCItemsService.GetbyId(formData.ContactId);
                 if (existingLCContact == null)
                 {
                     return Json(new

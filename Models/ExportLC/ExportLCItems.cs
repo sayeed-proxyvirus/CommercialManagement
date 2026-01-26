@@ -8,8 +8,8 @@ namespace CommercialManagement.Models.ExpLC
     {
         [Key]
         //[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        [Column("ExpID")]
-        public int ExpID { get; set; }
+        [Column("ContactId")]
+        public int ContactId { get; set; }
         [Column("ExpLCNo")]
         public string? ExpLCNo { get; set; }
         [Column("ContactNo")]
