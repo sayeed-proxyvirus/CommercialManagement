@@ -29,6 +29,9 @@ namespace CommercialManagement.Controllers.Exports
             try
             {
                 List<ExportMain> exportMainLCs = _dropDownService.GetExportMainLCs();
+                ViewBag.ListApplicant = _dropDownService.GetApplicantConsignees();
+                ViewBag.ListBeneficiary = _dropDownService.GetBeneficiary();
+                ViewBag.ListNotify = _dropDownService.GetNotifyingParty();
                 return View(exportMainLCs);
             }
             catch (Exception)
@@ -66,6 +69,7 @@ namespace CommercialManagement.Controllers.Exports
                     ExpDate = formData.ExpDate,
                     Dollars = formData.Dollars,
                     MainExpTaka = formData.MainExpTaka,
+                    MainExpRem = formData.MainExpRem,
                     ExpQuanity = formData.ExpQuanity,
                     ApplicantID = formData.ApplicantID,
                     BenID = formData.BenID,
@@ -120,6 +124,7 @@ namespace CommercialManagement.Controllers.Exports
                 existingLC.ExpDate = formData.ExpDate;
                 existingLC.Dollars = formData.Dollars;
                 existingLC.MainExpTaka = formData.MainExpTaka;
+                existingLC.MainExpRem = formData.MainExpRem;
                 existingLC.ExpQuanity = formData.ExpQuanity;
                 existingLC.ApplicantID = formData.ApplicantID;
                 existingLC.BenID = formData.BenID;
@@ -142,6 +147,94 @@ namespace CommercialManagement.Controllers.Exports
                     {
                         success = false,
                         message = "Failed to update LC. Please try again."
+                    });
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult AddContacts(ExportLCItems formData)
+        {
+            try
+            {
+                var userName = HttpContext.Session.GetString("UserName") ?? "System";
+                var ExportContacts = new ExportLCItems
+                {
+                    ExpLCNo = formData.ExpLCNo?.Trim(),
+                    ContactNo = formData.ContactNo,
+                    TotalPcs = formData.TotalPcs,
+                    TotalPrice = formData.TotalPrice,
+                };
+                bool success = _exportLCItemsService.AddExportLCItems(ExportContacts);
+                if (success)
+                {
+                    _logger.LogInformation("LC contact added Successfully");
+                    return Json(new
+                    {
+                        success = true,
+                        message = $"LC contact '{formData.ExpLCNo}' has been added successfully!!!"
+                    });
+                }
+                else
+                {
+                    _logger.LogWarning("LC Contact data addition has been failed");
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Failed to add LC contact. Please try again."
+                    });
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult UpdateContacts(ExportLCItems formData)
+        {
+            try
+            {
+                var userName = HttpContext.Session.GetString("UserName") ?? "System";
+                var existingLCContact = _exportLCItemsService.GetbyId(formData.ExpID);
+                if (existingLCContact == null)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "LC Contact not found."
+                    });
+                }
+
+                existingLCContact.ExpLCNo = formData.ExpLCNo?.Trim();
+                existingLCContact.ContactNo = formData.ContactNo;
+                existingLCContact.TotalPcs = formData.TotalPcs;
+                existingLCContact.TotalPrice = formData.TotalPrice;
+                bool success = _exportLCItemsService.UpdateExportLCItems(existingLCContact);
+                if (success)
+                {
+                    _logger.LogInformation("LC Contact updated Successfully");
+                    return Json(new
+                    {
+                        success = true,
+                        message = $"LC Contact '{formData.ExpLCNo}' has been updated successfully!!!"
+                    });
+                }
+                else
+                {
+                    _logger.LogWarning("LC Contact data Update has been failed");
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Failed to update LC Contact. Please try again."
                     });
                 }
             }

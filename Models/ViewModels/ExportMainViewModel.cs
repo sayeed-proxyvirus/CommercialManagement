@@ -8,7 +8,7 @@
         public DateTime? ShipDate { get; set; } ///ExpDate
         public decimal? TotalValue { get; set; } ///Dollars
         public decimal? MainExpTaka { get; set; }
-        public string? Reference { get; set; } ///MainExpRem
+        public string? MainExpRem { get; set; } ///MainExpRem
         public decimal? ExpQuanity { get; set; }
         public string? Destination { get; set; }
         public int? ApplicantID { get; set; }

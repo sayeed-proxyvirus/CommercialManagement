@@ -16,6 +16,8 @@ namespace CommercialManagement.Models.ExpLC
         public DateTime? ReceiveDate { get; set; }
         [Column("ExpDate")]
         public DateTime? ExpDate { get; set; }
+        [Column("MainExpRem")]
+        public string? MainExpRem { get; set; }
         [Column("Dollars")]
         public decimal? Dollars { get; set; }
         [Column("MainExpTaka")]

@@ -5,13 +5,13 @@
     var data = Model?.FirstOrDefault();
 }
 
-<div class="card shadow-sm border-0 mb-4">
+<div class="card shadow-sm border-0 mb-4" id="lcInfoCard" data-expid="@(data?.ExpID ?? 0)">
     <div class="card-header bg-light border-bottom d-flex justify-content-between align-items-center">
         <h5 class="mb-0"><i class="bi bi-file-earmark-text"></i> Export LC Details</h5>
-        <button type="button" class="btn-close" onclick="closeDetails()"></button>
+        <button type="button" class="btn-close" onclick="closeLCInfo()"></button>
     </div>
     <div class="card-body">
-        <form id="exportLCForm">
+        <form id="lcInfoForm">
             <div class="row g-3">
                 <!-- Left Column -->
                 <div class="col-md-6">
@@ -32,8 +32,8 @@
                     <!-- Total Value -->
                     <div class="mb-3">
                         <label for="totalValue" class="form-label fw-semibold">TOTAL VALUE $</label>
-                        <input type="text" class="form-control fw-bold text-primary" id="totalValue"
-                               value="@(data?.TotalValue?.ToString("N2") ?? "")" readonly
+                        <input type="number" class="form-control fw-bold text-primary" id="totalValue"
+                               value="@(data?.TotalValue ?? 0)" readonly step="0.01"
                                style="background-color: #007bff; color: white !important; font-size: 1.1rem;">
                     </div>
 
@@ -41,8 +41,12 @@
                     <div class="mb-3">
                         <label for="referenceNo" class="form-label fw-semibold">Reference #</label>
                         <input type="text" class="form-control" id="referenceNo"
-                               value="@(data?.Reference ?? "")" readonly style="background-color: #e9ecef;">
+                               value="@(data?.MainExpRem ?? "")" readonly style="background-color: #e9ecef;">
                     </div>
+                    
+                    <!-- Hidden fields to store additional data -->
+                    <input type="hidden" id="mainExpTaka" value="@(data?.MainExpTaka ?? 0)">
+                    <input type="hidden" id="expQuantity" value="@(data?.ExpQuanity ?? 0)">
                 </div>
 
                 <!-- Right Column -->
@@ -120,13 +124,13 @@
             <!-- Action Buttons -->
             <div class="row mt-4">
                 <div class="col-12 d-flex justify-content-end gap-2">
-                    <button type="button" class="btn btn-secondary" onclick="closeDetails()">
+                    <button type="button" class="btn btn-secondary" onclick="closeLCInfo()">
                         <i class="bi bi-x-circle"></i> Close
                     </button>
                     <button type="button" class="btn btn-primary" onclick="editLC()">
                         <i class="bi bi-pencil"></i> Edit
                     </button>
-                    <button type="button" class="btn btn-success" onclick="saveLC()">
+                    <button type="button" class="btn btn-success" id="btnSaveLC" onclick="saveLC()" style="display: none;">
                         <i class="bi bi-save"></i> Save
                     </button>
                 </div>
@@ -137,36 +141,132 @@
 
 <script>
     function editLC() {
-        // Enable all form fields for editing
-        $('#exportLCForm').find('input:not(#exportLCNo), select').prop('disabled', false)
-            .css('background-color', '');
-        $('#exportLCForm').find('input[readonly]').prop('readonly', false)
-            .css('background-color', '');
+        console.log('Edit mode activated');
+        
+        // Enable all form fields for editing except the LC No
+        $('#lcInfoForm').find('input:not(#exportLCNo), select').prop('disabled', false)
+            .css('background-color', '#ffffff');
+        
+        $('#lcInfoForm').find('input[readonly]:not(#exportLCNo)').prop('readonly', false)
+            .css('background-color', '#ffffff');
+        
+        // Show Save button, hide Edit button
+        $('#btnSaveLC').show();
+        $('button[onclick="editLC()"]').hide();
 
         showAlert('info', 'Edit mode enabled. Modify the fields and click Save.');
     }
 
     function saveLC() {
-        // Collect form data
+        console.log('Save LC clicked');
+        
+        // Get ExpID from the card's data attribute
+        const expID = $('#lcInfoCard').data('expid');
+        
+        console.log('ExpID:', expID);
+        
+        if (!expID || expID === 0) {
+            showAlert('danger', 'Error: Export LC ID not found');
+            return;
+        }
+        
+        // Collect form data from the actual input fields
         const formData = {
-            MainExpName: $('#exportLCNo').val(),
+            ExpID: parseInt(expID),
+            MainExpName: $('#exportLCNo').val().trim(),
             ReceiveDate: $('#lcDate').val(),
-            Dollars: $('#totalValue').val().replace(/,/g, ''),
-            ReferenceNo: $('#referenceNo').val(),
-            ApplicantId: $('#lcApplicant').val(),
-            BeneficiaryId: $('#beneficiary').val(),
-            NotifyId: $('#notify').val(),
-            ExpDate: $('#shipDate').val(),
-            Destination: $('#destination').val()
+            ExpDate: $('#shipDate').val() || null,
+            Dollars: parseFloat($('#totalValue').val()) || 0,
+            MainExpRem: $('#referenceNo').val().trim(),
+            MainExpTaka: parseFloat($('#mainExpTaka').val()) || null,
+            ExpQuanity: parseFloat($('#expQuantity').val()) || null,
+            ApplicantID: parseInt($('#lcApplicant').val()) || null,
+            BenID: parseInt($('#beneficiary').val()) || null,
+            PartyID: parseInt($('#notify').val()) || null,
+            Destination: $('#destination').val().trim() || null
         };
+        
+        console.log('Form Data being sent:', formData);
+        
+        // Validate required fields
+        if (!formData.MainExpName) {
+            showAlert('warning', 'LC Number is required');
+            return;
+        }
+        
+        if (!formData.ReceiveDate) {
+            showAlert('warning', 'LC Date is required');
+            return;
+        }
+        
+        if (!formData.Dollars || formData.Dollars <= 0) {
+            showAlert('warning', 'Total Value must be greater than 0');
+            return;
+        }
+        
+        if (!formData.ApplicantID) {
+            showAlert('warning', 'Please select an Applicant');
+            return;
+        }
+        
+        if (!formData.BenID) {
+            showAlert('warning', 'Please select a Beneficiary');
+            return;
+        }
+        
+        if (!formData.PartyID) {
+            showAlert('warning', 'Please select a Notify Party');
+            return;
+        }
 
-        // Add save logic here
-        console.log('Saving LC:', formData);
-        showAlert('success', 'Export LC saved successfully!');
+        // Disable save button
+        $('#btnSaveLC').prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Saving...');
 
-        // Disable fields after save
-        $('#exportLCForm').find('input, select').prop('disabled', true)
-            .css('background-color', '#e9ecef');
+        $.ajax({
+            url: '@Url.Action("UpdateLCs", "ExportMain")',
+            type: 'POST',
+            data: formData,
+            headers: {
+                'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+            },
+            success: function(response) {
+                console.log('Server Response:', response);
+                
+                if (response.success) {
+                    showAlert('success', response.message);
+                    
+                    // Disable fields again
+                    $('#lcInfoForm').find('input, select').prop('disabled', true)
+                        .css('background-color', '#e9ecef');
+                    $('#lcInfoForm').find('input').prop('readonly', true);
+                    
+                    // Hide Save button, show Edit button
+                    $('#btnSaveLC').hide();
+                    $('button[onclick="editLC()"]').show();
+                    
+                    // Reload the LC info after a short delay
+                    const lcName = formData.MainExpName;
+                    setTimeout(function() {
+                        if (typeof loadLCInfo === 'function') {
+                            loadLCInfo(lcName);
+                        }
+                        // Update the dropdown selection
+                        $('#lcSearch').val(lcName);
+                    }, 1000);
+                    
+                } else {
+                    showAlert('danger', response.message);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('AJAX Error:', status, error);
+                console.error('Response:', xhr.responseText);
+                showAlert('danger', 'An error occurred while updating the LC. Please try again.');
+            },
+            complete: function() {
+                $('#btnSaveLC').prop('disabled', false).html('<i class="bi bi-save"></i> Save');
+            }
+        });
     }
 </script>
 
@@ -185,8 +285,12 @@
     }
 
     #totalValue {
-        background-color: #007bff !important;
-        color: white !important;
-        border-color: #007bff !important;
+        background-color: #007bff;
+        color: #000000;
     }
+
+        #totalValue:not([readonly]) {
+            background-color: #007bff !important;
+            color: #000000 !important;
+        }
 </style>

@@ -49,6 +49,165 @@
     <!-- Contact Details Container (Partial View with Table) -->
     <div id="contactDetailsContainer"></div>
 </div>
+<div class="modal fade" id="exportLCModal" tabindex="-1" aria-labelledby="exportLCModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="exportLCModalLabel">
+                    <i class="bi bi-file-earmark-plus"></i> <span id="modalTitle">Add Export LC</span>
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="exportLCForm">
+                <div class="modal-body">
+                    <input type="hidden" id="ExpID" name="ExpID" value="0" />
+
+                    <div class="row g-3">
+                        <!-- Left Column -->
+                        <div class="col-md-6">
+                            <!-- Export LC No -->
+                            <div class="mb-3">
+                                <label for="MainExpName" class="form-label fw-semibold">
+                                    <i class="bi bi-file-text"></i> EXPORT L/C NO: <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="MainExpName" name="MainExpName"
+                                       placeholder="Enter LC Number" required maxlength="50">
+                                <div class="invalid-feedback">Please enter LC Number</div>
+                            </div>
+
+                            <!-- L/C Receive Date -->
+                            <div class="mb-3">
+                                <label for="ReceiveDate" class="form-label fw-semibold">
+                                    <i class="bi bi-calendar"></i> L/C RECEIVE DATE: <span class="text-danger">*</span>
+                                </label>
+                                <input type="date" class="form-control" id="ReceiveDate" name="ReceiveDate" required>
+                                <div class="invalid-feedback">Please select receive date</div>
+                            </div>
+
+                            <!-- Total Value (Dollars) -->
+                            <div class="mb-3">
+                                <label for="Dollars" class="form-label fw-semibold">
+                                    <i class="bi bi-currency-dollar"></i> TOTAL VALUE ($): <span class="text-danger">*</span>
+                                </label>
+                                <input type="number" class="form-control" id="Dollars" name="Dollars"
+                                       placeholder="0.00" step="0.01" min="0" required>
+                                <div class="invalid-feedback">Please enter total value</div>
+                            </div>
+
+                            <!-- Total Value (Taka) -->
+                            <div class="mb-3">
+                                <label for="MainExpTaka" class="form-label fw-semibold">
+                                    <i class="bi bi-cash"></i> TOTAL VALUE (TAKA):
+                                </label>
+                                <input type="number" class="form-control" id="MainExpTaka" name="MainExpTaka"
+                                       placeholder="0.00" step="0.01" min="0">
+                            </div>
+
+                            <!-- Quantity -->
+                            <div class="mb-3">
+                                <label for="ExpQuanity" class="form-label fw-semibold">
+                                    <i class="bi bi-box"></i> QUANTITY:
+                                </label>
+                                <input type="number" class="form-control" id="ExpQuanity" name="ExpQuanity"
+                                       placeholder="0" step="1" min="0">
+                            </div>
+                            <div class="mb-3">
+                                <label for="Reference" class="form-label fw-semibold">
+                                    <i class="bi bi-file-text"></i> References <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="MainExpRem" name="MainExpRem"
+                                       placeholder="Enter References" required maxlength="50">
+                                <div class="invalid-feedback">Please enter References</div>
+                            </div>
+                        </div>
+
+                        <!-- Right Column -->
+                        <div class="col-md-6">
+                            <!-- LC Applicant -->
+                            <div class="mb-3">
+                                <label for="ApplicantID" class="form-label fw-semibold">
+                                    <i class="bi bi-person-badge"></i> LC APPLICANT: <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select" id="ApplicantID" name="ApplicantID" required>
+                                    <option value="">-- Select Applicant --</option>
+                                    @if (ViewBag.ListApplicant != null)
+                                    {
+                                        foreach (var applicant in ViewBag.ListApplicant)
+                                        {
+                                            <option value="@applicant.ApplicantID">@applicant.ApplicantName</option>
+                                        }
+                                    }
+                                </select>
+                                <div class="invalid-feedback">Please select an applicant</div>
+                            </div>
+
+                            <!-- Beneficiary -->
+                            <div class="mb-3">
+                                <label for="BenID" class="form-label fw-semibold">
+                                    <i class="bi bi-building"></i> BENEFICIARY: <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select" id="BenID" name="BenID" required>
+                                    <option value="">-- Select Beneficiary --</option>
+                                    @if (ViewBag.ListBeneficiary != null)
+                                    {
+                                        foreach (var beneficiary in ViewBag.ListBeneficiary)
+                                        {
+                                            <option value="@beneficiary.BenID">@beneficiary.BenName</option>
+                                        }
+                                    }
+                                </select>
+                                <div class="invalid-feedback">Please select a beneficiary</div>
+                            </div>
+
+                            <!-- Notify Party -->
+                            <div class="mb-3">
+                                <label for="PartyID" class="form-label fw-semibold">
+                                    <i class="bi bi-bell"></i> NOTIFY PARTY: <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select" id="PartyID" name="PartyID" required>
+                                    <option value="">-- Select Notify Party --</option>
+                                    @if (ViewBag.ListNotify != null)
+                                    {
+                                        foreach (var notify in ViewBag.ListNotify)
+                                        {
+                                            <option value="@notify.PartyID">@notify.PartyName</option>
+                                        }
+                                    }
+                                </select>
+                                <div class="invalid-feedback">Please select a notify party</div>
+                            </div>
+
+                            <!-- Ship Date -->
+                            <div class="mb-3">
+                                <label for="ExpDate" class="form-label fw-semibold">
+                                    <i class="bi bi-calendar-event"></i> SHIPMENT DATE:
+                                </label>
+                                <input type="date" class="form-control" id="ExpDate" name="ExpDate">
+                            </div>
+
+                            <!-- Destination -->
+                            <div class="mb-3">
+                                <label for="Destination" class="form-label fw-semibold">
+                                    <i class="bi bi-geo-alt"></i> DESTINATION:
+                                </label>
+                                <input type="text" class="form-control" id="Destination" name="Destination"
+                                       placeholder="Enter destination" maxlength="100">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle"></i> Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary" id="btnSaveLC">
+                        <i class="bi bi-save"></i> <span id="btnSaveText">Save LC</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 @section Scripts {
     <script>
@@ -66,9 +225,28 @@
                 }
             });
 
+            // Handle Add button click
             $('#btnAdd').click(function() {
-                // Add new LC logic here
-                showAlert('info', 'Add New LC functionality to be implemented');
+                openAddModal();
+            });
+
+            // Handle form submission
+            $('#exportLCForm').on('submit', function(e) {
+                e.preventDefault();
+
+                // Validate form
+                if (!validateForm()) {
+                    return false;
+                }
+
+                const expID = $('#ExpID').val();
+                const isEdit = expID && expID !== '0';
+
+                if (isEdit) {
+                    updateExportLC();
+                } else {
+                    addExportLC();
+                }
             });
         });
 
@@ -116,11 +294,217 @@
             });
         }
 
-        function reloadPage() {
-            location.reload();
+        // Open Add Modal
+        function openAddModal() {
+            // Reset form
+            $('#exportLCForm')[0].reset();
+            $('#ExpID').val('0');
+
+            // Update modal title
+            $('#modalTitle').text('Add Export LC');
+            $('#btnSaveText').text('Save LC');
+
+            // Clear validation
+            $('#exportLCForm').removeClass('was-validated');
+            $('.form-control, .form-select').removeClass('is-invalid');
+
+            // Show modal
+            $('#exportLCModal').modal('show');
         }
 
-        function showAlert(type, msg) {
+        // Open Edit Modal
+        function editLC() {
+            // Get the ExpID from the container
+            const expID = $('#lcInfoContainer .card').data('expid');
+
+            // Get data from the current LC info display
+            const lcData = {
+                ExpID: expID,
+                MainExpName: $('#exportLCNo').val(),
+                ReceiveDate: $('#lcDate').val(),
+                Dollars: $('#totalValue').val().replace(/,/g, ''),
+                ExpDate: $('#shipDate').val(),
+                ApplicantID: $('#lcApplicant').val(),
+                BenID: $('#beneficiary').val(),
+                PartyID: $('#notify').val(),
+                Destination: $('#destination').val()
+            };
+
+            // Populate form with data
+            $('#ExpID').val(lcData.ExpID);
+            $('#MainExpName').val(lcData.MainExpName);
+            $('#ReceiveDate').val(lcData.ReceiveDate);
+            $('#Dollars').val(lcData.Dollars);
+            $('#ExpDate').val(lcData.ExpDate);
+            $('#ApplicantID').val(lcData.ApplicantID);
+            $('#BenID').val(lcData.BenID);
+            $('#PartyID').val(lcData.PartyID);
+            $('#Destination').val(lcData.Destination);
+
+            // Update modal title
+            $('#modalTitle').text('Edit Export LC');
+            $('#btnSaveText').text('Update LC');
+
+            // Clear validation
+            $('#exportLCForm').removeClass('was-validated');
+            $('.form-control, .form-select').removeClass('is-invalid');
+
+            // Show modal
+            $('#exportLCModal').modal('show');
+        }
+
+        // Validate form
+        function validateForm() {
+            let isValid = true;
+
+            // Clear previous validation
+            $('.form-control, .form-select').removeClass('is-invalid');
+
+            // Check required fields
+            if (!$('#MainExpName').val().trim()) {
+                $('#MainExpName').addClass('is-invalid');
+                isValid = false;
+            }
+
+            if (!$('#ReceiveDate').val()) {
+                $('#ReceiveDate').addClass('is-invalid');
+                isValid = false;
+            }
+
+            if (!$('#Dollars').val() || parseFloat($('#Dollars').val()) <= 0) {
+                $('#Dollars').addClass('is-invalid');
+                isValid = false;
+            }
+
+            if (!$('#ApplicantID').val()) {
+                $('#ApplicantID').addClass('is-invalid');
+                isValid = false;
+            }
+
+            if (!$('#BenID').val()) {
+                $('#BenID').addClass('is-invalid');
+                isValid = false;
+            }
+
+            if (!$('#PartyID').val()) {
+                $('#PartyID').addClass('is-invalid');
+                isValid = false;
+            }
+
+            if (!isValid) {
+                showAlert('warning', 'Please fill in all required fields');
+            }
+
+            return isValid;
+        }
+
+        // Add Export LC
+        function addExportLC() {
+            const formData = {
+                MainExpName: $('#MainExpName').val().trim(),
+                ReceiveDate: $('#ReceiveDate').val(),
+                ExpDate: $('#ExpDate').val() || null,
+                Dollars: parseFloat($('#Dollars').val()) || 0,
+                MainExpTaka: parseFloat($('#MainExpTaka').val()) || null,
+                ExpQuanity: parseFloat($('#ExpQuanity').val()) || null,
+                MainExpRem: $('#MainExpRem').val().trim(),
+                ApplicantID: parseInt($('#ApplicantID').val()),
+                BenID: parseInt($('#BenID').val()),
+                PartyID: parseInt($('#PartyID').val()),
+                Destination: $('#Destination').val().trim() || null
+            };
+
+            // Disable submit button
+            $('#btnSaveLC').prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Saving...');
+
+            $.ajax({
+                url: '@Url.Action("AddLCs", "ExportMain")',
+                type: 'POST',
+                data: formData,
+                headers: {
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(response) {
+                    if (response.success) {
+                        showAlert('success', response.message);
+                        $('#exportLCModal').modal('hide');
+
+                        // Reload the page to refresh LC dropdown
+                        setTimeout(function() {
+                            location.reload();
+                        }, 1500);
+                    } else {
+                        showAlert('danger', response.message);
+                    }
+                },
+                error: function(xhr) {
+                    showAlert('danger', 'An error occurred while adding the LC. Please try again.');
+                    console.error('Error:', xhr);
+                },
+                complete: function() {
+                    $('#btnSaveLC').prop('disabled', false).html('<i class="bi bi-save"></i> Save LC');
+                }
+            });
+        }
+
+        // Update Export LC
+        function updateExportLC() {
+            const formData = {
+                ExpID: parseInt($('#ExpID').val()),
+                MainExpName: $('#MainExpName').val().trim(),
+                ReceiveDate: $('#ReceiveDate').val(),
+                ExpDate: $('#ExpDate').val() || null,
+                Dollars: parseFloat($('#Dollars').val()) || 0,
+                MainExpTaka: parseFloat($('#MainExpTaka').val()) || null,
+                MainExpRem: $('#MainExpRem').val().trim() || null,
+                ExpQuanity: parseFloat($('#ExpQuanity').val()) || null,
+                ApplicantID: parseInt($('#ApplicantID').val()),
+                BenID: parseInt($('#BenID').val()),
+                PartyID: parseInt($('#PartyID').val()),
+                Destination: $('#Destination').val().trim() || null
+            };
+
+            // Disable submit button
+            $('#btnSaveLC').prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Updating...');
+
+            $.ajax({
+                url: '@Url.Action("UpdateLCs", "ExportMain")',
+                type: 'POST',
+                data: formData,
+                headers: {
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(response) {
+                    if (response.success) {
+                        showAlert('success', response.message);
+                        $('#exportLCModal').modal('hide');
+
+                        // Reload the LC info
+                        const lcName = $('#lcSearch').val();
+                        if (lcName) {
+                            loadLCInfo(lcName);
+                        }
+
+                        // Reload dropdown
+                        setTimeout(function() {
+                            location.reload();
+                        }, 1500);
+                    } else {
+                        showAlert('danger', response.message);
+                    }
+                },
+                error: function(xhr) {
+                    showAlert('danger', 'An error occurred while updating the LC. Please try again.');
+                    console.error('Error:', xhr);
+                },
+                complete: function() {
+                    $('#btnSaveLC').prop('disabled', false).html('<i class="bi bi-save"></i> Update LC');
+                }
+            });
+        }
+
+        // Show alert helper
+        function showAlert(type, message) {
             const icons = {
                 success: 'check-circle',
                 danger: 'exclamation-triangle',
@@ -128,14 +512,24 @@
                 info: 'info-circle'
             };
 
-            $('#alertContainer').html(`
-                <div class="alert alert-${type} alert-dismissible fade show shadow-sm">
-                    <i class="bi bi-${icons[type]}"></i> ${msg}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            const alertHtml = `
+                <div class="alert alert-${type} alert-dismissible fade show shadow-sm" role="alert">
+                    <i class="bi bi-${icons[type]}"></i> ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
-            `);
+            `;
 
-            setTimeout(() => $('.alert').fadeOut(), 5000);
+            $('#alertContainer').html(alertHtml);
+
+            // Auto dismiss after 5 seconds
+            setTimeout(function() {
+                $('.alert').fadeOut(400, function() {
+                    $(this).remove();
+                });
+            }, 5000);
+
+            // Scroll to top to show alert
+            $('html, body').animate({ scrollTop: 0 }, 300);
         }
     </script>
 }
@@ -158,4 +552,29 @@
     #lcSearch {
         font-size: 1rem;
     }
+
+    .form-label {
+        font-size: 0.85rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .modal-body {
+        max-height: 70vh;
+        overflow-y: auto;
+    }
+
+    .invalid-feedback {
+        display: none;
+        font-size: 0.875rem;
+    }
+
+    .form-control.is-invalid,
+    .form-select.is-invalid {
+        border-color: #dc3545;
+    }
+
+        .form-control.is-invalid ~ .invalid-feedback,
+        .form-select.is-invalid ~ .invalid-feedback {
+            display: block;
+        }
 </style>
