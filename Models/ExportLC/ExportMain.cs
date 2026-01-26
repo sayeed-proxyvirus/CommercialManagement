@@ -22,12 +22,12 @@ namespace CommercialManagement.Models.ExpLC
         public decimal? MainExpTaka { get; set; }
         [Column("ExpQuanity")]
         public decimal? ExpQuanity { get; set; }
-        [Column("ApplicantCode")]
-        public string? ApplicantCode { get; set; }
-        [Column("BenCode")]
-        public string? BenCode { get; set; }
-        [Column("PartyCode")]
-        public string? PartyCode { get; set; }
+        [Column("ApplicantID")]
+        public int? ApplicantID { get; set; }
+        [Column("BenID")]
+        public int? BenID { get; set; }
+        [Column("PartyID")]
+        public int? PartyID { get; set; }
         [Column("Destination")]
         public string? Destination { get; set; }
     }

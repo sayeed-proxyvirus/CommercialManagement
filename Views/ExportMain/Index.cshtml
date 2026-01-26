@@ -1,5 +1,4 @@
-﻿@* Views/ExportMain/Index.cshtml *@
-@model List<CommercialManagement.Models.ExpLC.ExportMain>
+﻿@model List<CommercialManagement.Models.ExpLC.ExportMain>
 @{
     ViewData["Title"] = "Export LC Management";
 }
@@ -14,7 +13,7 @@
         </div>
         <div class="card-body">
             <div class="row g-3">
-                <div class="col-md-6">
+                <div class="col-md-8">
                     <label for="lcSearch" class="form-label fw-semibold">
                         <i class="bi bi-search"></i> EXPORT L/C NO:
                     </label>
@@ -32,103 +31,23 @@
                         }
                     </select>
                 </div>
-                <div class="col-md-3 d-flex align-items-end gap-2">
+                <div class="col-md-4 d-flex align-items-end gap-2">
                     <button type="button" class="btn btn-primary flex-grow-1" id="btnSearch" disabled>
                         <i class="bi bi-search"></i> Search
                     </button>
                     <button type="button" class="btn btn-success" id="btnAdd">
-                        <i class="bi bi-plus-circle"></i> Add
+                        <i class="bi bi-plus-circle"></i> Add New
                     </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Partial View Container -->
-    <div id="detailsContainer"></div>
+    <!-- LC Info Container (Partial View) -->
+    <div id="lcInfoContainer"></div>
 
-    <!-- Export LCs Table -->
-    <div class="card shadow-sm border-0">
-        <div class="card-header bg-white border-bottom">
-            <div class="row align-items-center">
-                <div class="col-md-6">
-                    <h5 class="mb-0"><i class="bi bi-list-ul"></i> All Export LCs</h5>
-                </div>
-                <div class="col-md-6">
-                    <input type="text" class="form-control" id="tableFilter"
-                           placeholder="Filter table...">
-                </div>
-            </div>
-        </div>
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover mb-0" id="lcTable">
-                    <thead class="table-light">
-                        <tr>
-                            <th>LC Name</th>
-                            <th>LC Date</th>
-                            <th>Ship Date</th>
-                            <th>Amount (USD)</th>
-                            <th>Quantity</th>
-                            <th>Destination</th>
-                            <th class="text-center" style="width:80px;">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @if (Model != null && Model.Any())
-                        {
-                            foreach (var item in Model)
-                            {
-                                <tr>
-                                    <td class="fw-semibold text-primary">@(item.MainExpName ?? "-")</td>
-                                    <td>@(item.ReceiveDate?.ToString("dd/MM/yyyy") ?? "-")</td>
-                                    <td>@(item.ExpDate?.ToString("dd/MM/yyyy") ?? "-")</td>
-                                    <td>
-                                        @if (item.Dollars.HasValue)
-                                        {
-                                            <span class="badge bg-success">$@item.Dollars.Value.ToString("N2")</span>
-                                        }
-                                        else
-                                        {
-                                            <span>-</span>
-                                        }
-                                    </td>
-                                    <td>@(item.ExpQuanity?.ToString("N0") ?? "-")</td>
-                                    <td><i class="bi bi-geo-alt text-primary"></i> @(item.Destination ?? "-")</td>
-                                    <td class="text-center">
-                                        <button type="button" class="btn btn-sm btn-outline-primary"
-                                                onclick="viewLC('@item.MainExpName')">
-                                            <i class="bi bi-eye"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                            }
-                        }
-                        else
-                        {
-                            <tr>
-                                <td colspan="7" class="text-center py-4 text-muted">
-                                    <i class="bi bi-inbox fs-1 d-block mb-2"></i>
-                                    No Export LCs found
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        @if (Model?.Count > 0)
-        {
-            <div class="card-footer bg-white border-top">
-                <small class="text-muted">
-                    Showing <span id="count">@Model.Count</span> Export LCs |
-                    Total: <strong class="text-success">
-                        $@Model.Where(x => x.Dollars.HasValue).Sum(x => x.Dollars.Value).ToString("N2")
-                    </strong>
-                </small>
-            </div>
-        }
-    </div>
+    <!-- Contact Details Container (Partial View with Table) -->
+    <div id="contactDetailsContainer"></div>
 </div>
 
 @section Scripts {
@@ -137,58 +56,64 @@
             $('#lcSearch').change(function() {
                 const val = $(this).val();
                 $('#btnSearch').prop('disabled', !val);
-                $('#lcDate').val(val ? $(this).find(':selected').data('lcdate') : '');
             });
 
-        $('#btnSearch').click(function() {
-            const lcName = $('#lcSearch').val();
-            if (lcName) {
-                $('#detailsContainer').html('<div class="text-center py-4"><div class="spinner-border"></div></div>');
-                $('html, body').animate({ scrollTop: $('#detailsContainer').offset().top - 20 }, 400);
+            $('#btnSearch').click(function() {
+                const lcName = $('#lcSearch').val();
+                if (lcName) {
+                    loadLCInfo(lcName);
+                    loadContactDetails(lcName);
+                }
+            });
 
-                $.ajax({
-                    url: '@Url.Action("GetLCInfo", "ExportMain")',
-                    type: 'GET',
-                    data: { LCName: lcName },
-                    success: function(html) {
-                        $('#detailsContainer').html(html);
-                    },
-                    error: function() {
-                        $('#detailsContainer').html('<div class="alert alert-danger">Failed to load LC details</div>');
-                    }
-                });
-            }
-        });
-
-            $('#btnAdd').click(() => loadDetails('', 'add'));
-
-            $('#tableFilter').keyup(function() {
-                const term = $(this).val().toLowerCase();
-                $('#lcTable tbody tr').each(function() {
-                    $(this).toggle($(this).text().toLowerCase().indexOf(term) > -1);
-                });
+            $('#btnAdd').click(function() {
+                // Add new LC logic here
+                showAlert('info', 'Add New LC functionality to be implemented');
             });
         });
 
-        function loadDetails(lcName, mode) {
-            $('#detailsContainer').html('<div class="text-center py-4"><div class="spinner-border"></div></div>');
-            $('html, body').animate({ scrollTop: $('#detailsContainer').offset().top - 20 }, 400);
+        function loadLCInfo(lcName) {
+            $('#lcInfoContainer').html('<div class="text-center py-4"><div class="spinner-border"></div></div>');
 
-            $.get('@Url.Action("GetExportMainDetails", "ExportMain")', { lcName, mode }, function(html) {
-                $('#detailsContainer').html(html);
-            }).fail(() => {
-                $('#detailsContainer').html('<div class="alert alert-danger">Failed to load</div>');
+            $.ajax({
+                url: '@Url.Action("GetLCInfo", "ExportMain")',
+                type: 'GET',
+                data: { LCName: lcName },
+                success: function(html) {
+                    $('#lcInfoContainer').html(html);
+                },
+                error: function() {
+                    $('#lcInfoContainer').html('<div class="alert alert-danger">Failed to load LC details</div>');
+                }
             });
         }
 
-        function viewLC(name) {
-            $('#lcSearch').val(name).change();
-            $('#btnSearch').click();
+        function loadContactDetails(lcName) {
+            $('#contactDetailsContainer').html('<div class="text-center py-4"><div class="spinner-border"></div></div>');
+
+            $.ajax({
+                url: '@Url.Action("GetContactInfo", "ExportMain")',
+                type: 'GET',
+                data: { LCName: lcName },
+                success: function(html) {
+                    $('#contactDetailsContainer').html(html);
+                },
+                error: function() {
+                    $('#contactDetailsContainer').html('<div class="alert alert-danger">Failed to load contact details</div>');
+                }
+            });
         }
 
-        function closeDetails() {
-            $('#detailsContainer').slideUp(400, () => $('#detailsContainer').empty());
-            $('#lcSearch').val('').change();
+        function closeLCInfo() {
+            $('#lcInfoContainer').slideUp(400, function() {
+                $(this).empty();
+            });
+        }
+
+        function closeContactDetails() {
+            $('#contactDetailsContainer').slideUp(400, function() {
+                $(this).empty();
+            });
         }
 
         function reloadPage() {
@@ -196,34 +121,41 @@
         }
 
         function showAlert(type, msg) {
-            const icons = { success: 'check-circle', danger: 'exclamation-triangle', warning: 'exclamation-circle' };
+            const icons = {
+                success: 'check-circle',
+                danger: 'exclamation-triangle',
+                warning: 'exclamation-circle',
+                info: 'info-circle'
+            };
+
             $('#alertContainer').html(`
-                <div class="alert alert-${type} alert-dismissible fade show">
+                <div class="alert alert-${type} alert-dismissible fade show shadow-sm">
                     <i class="bi bi-${icons[type]}"></i> ${msg}
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             `);
+
             setTimeout(() => $('.alert').fadeOut(), 5000);
         }
     </script>
 }
 
 <style>
-    .table thead th {
-        font-size: 0.75rem;
-        text-transform: uppercase;
-        color: #6c757d;
+    .form-label {
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
     }
 
-    .table tbody tr {
-        transition: background-color 0.2s;
+    .card {
+        border-radius: 12px;
     }
-
-        .table tbody tr:hover {
-            background-color: #f8f9fa;
-        }
 
     .btn:hover {
         transform: translateY(-1px);
+        transition: transform 0.2s;
+    }
+
+    #lcSearch {
+        font-size: 1rem;
     }
 </style>

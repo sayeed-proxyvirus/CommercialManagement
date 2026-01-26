@@ -1,0 +1,284 @@
+﻿@model List<CommercialManagement.Models.ViewModels.ExportLCViewModel>
+
+@{
+    var totalPcs = Model?.Sum(x => x.TotalPcs ?? 0) ?? 0;
+    var totalPrice = Model?.Sum(x => x.TotalPrice ?? 0) ?? 0;
+}
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-light border-bottom d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="bi bi-table"></i> Contact Details</h5>
+        <button type="button" class="btn-close" onclick="closeContactDetails()"></button>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover table-striped align-middle mb-0" id="contactTable">
+                <thead class="table-light">
+                    <tr>
+                        <th class="px-3" style="width: 120px;">Contact NO</th>
+                        <th>Style Name</th>
+                        <th class="text-end" style="width: 130px;">Qnty in PCS</th>
+                        <th class="text-end" style="width: 130px;">Unit Price $</th>
+                        <th class="text-end" style="width: 150px;">Total</th>
+                    </tr>
+                </thead>
+                <tbody id="contactTableBody">
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="px-3 fw-semibold">@(item.ContactNo ?? "-")</td>
+                                <td>@(item.StyleDesc ?? "Not found")</td>
+                                <td class="text-end">@((item.TotalPcs ?? 0).ToString("N0"))</td>
+                                <td class="text-end">@((item.TotalPrice ?? 0).ToString("N4"))</td>
+                                <td class="text-end fw-bold">@(((item.TotalPcs ?? 0) * (item.TotalPrice ?? 0)).ToString("N2"))</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center py-4 text-muted">
+                                <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                                No contact details found
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+                @if (Model != null && Model.Any())
+                {
+                    <tfoot class="table-light fw-bold">
+                        <tr>
+                            <td colspan="2" class="px-3 text-end">
+                                <strong>Total:</strong>
+                            </td>
+                            <td class="text-end">
+                                <span id="totalPcs">@totalPcs.ToString("N0")</span> Pcs
+                            </td>
+                            <td class="text-end"></td>
+                            <td class="text-end text-success">
+                                $ <span id="totalPrice">@totalPrice.ToString("N2")</span>
+                            </td>
+                        </tr>
+                    </tfoot>
+                }
+            </table>
+        </div>
+
+        @if (Model != null && Model.Any())
+        {
+            <div class="card-footer bg-white border-top">
+                <div class="d-flex justify-content-between align-items-center">
+                    <small class="text-muted">
+                        Showing <span id="pageInfo">1 to @Math.Min(10, Model.Count) of @Model.Count</span> entries
+                    </small>
+                    <div id="paginationContainer"></div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@if (Model != null && Model.Any())
+{
+<script>
+        $(document).ready(function() {
+            initializeContactPagination();
+        });
+
+        let contactCurrentPage = 1;
+        const contactRowsPerPage = 15; // Fixed page length
+        let contactAllRows = [];
+
+        function initializeContactPagination() {
+            // Store all rows
+            contactAllRows = $('#contactTableBody tr').toArray();
+
+            // Display first page
+            displayContactPage();
+        }
+
+        function displayContactPage() {
+            // Hide all rows first
+            contactAllRows.forEach(row => $(row).hide());
+
+            // Calculate pagination
+            const totalPages = Math.ceil(contactAllRows.length / contactRowsPerPage);
+            const start = (contactCurrentPage - 1) * contactRowsPerPage;
+            const end = start + contactRowsPerPage;
+
+            // Show rows for current page
+            contactAllRows.slice(start, end).forEach(row => $(row).show());
+
+            // Update footer info
+            updateContactFooter(contactAllRows.length, start, end);
+
+            // Render pagination controls
+            renderContactPagination(totalPages);
+
+            // Recalculate totals for visible rows
+            updateVisibleTotals();
+        }
+
+        function updateContactFooter(total, start, end) {
+            const displayStart = total > 0 ? start + 1 : 0;
+            const displayEnd = Math.min(end, total);
+
+            $('#pageInfo').text(`${displayStart} to ${displayEnd} of ${total}`);
+        }
+
+        function renderContactPagination(totalPages) {
+            if (totalPages <= 1) {
+                $('#paginationContainer').html('');
+                return;
+            }
+
+            let html = '<nav aria-label="Contact pagination"><ul class="pagination pagination-sm mb-0">';
+
+            // Previous button
+            html += `<li class="page-item ${contactCurrentPage === 1 ? 'disabled' : ''}">
+                        <a class="page-link" href="#" onclick="changeContactPage(${contactCurrentPage - 1}); return false;">
+                            <i class="bi bi-chevron-left"></i>
+                        </a>
+                     </li>`;
+
+            // Page numbers
+            const maxPages = 5;
+            let startPage = Math.max(1, contactCurrentPage - Math.floor(maxPages / 2));
+            let endPage = Math.min(totalPages, startPage + maxPages - 1);
+
+            if (endPage - startPage < maxPages - 1) {
+                startPage = Math.max(1, endPage - maxPages + 1);
+            }
+
+            // First page
+            if (startPage > 1) {
+                html += `<li class="page-item">
+                            <a class="page-link" href="#" onclick="changeContactPage(1); return false;">1</a>
+                         </li>`;
+                if (startPage > 2) {
+                    html += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+                }
+            }
+
+            // Page numbers
+            for (let i = startPage; i <= endPage; i++) {
+                html += `<li class="page-item ${i === contactCurrentPage ? 'active' : ''}">
+                            <a class="page-link" href="#" onclick="changeContactPage(${i}); return false;">${i}</a>
+                         </li>`;
+            }
+
+            // Last page
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    html += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+                }
+                html += `<li class="page-item">
+                            <a class="page-link" href="#" onclick="changeContactPage(${totalPages}); return false;">${totalPages}</a>
+                         </li>`;
+            }
+
+            // Next button
+            html += `<li class="page-item ${contactCurrentPage === totalPages ? 'disabled' : ''}">
+                        <a class="page-link" href="#" onclick="changeContactPage(${contactCurrentPage + 1}); return false;">
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                     </li>`;
+
+            html += '</ul></nav>';
+
+            $('#paginationContainer').html(html);
+        }
+
+        function changeContactPage(page) {
+            const totalPages = Math.ceil(contactAllRows.length / contactRowsPerPage);
+
+            if (page < 1 || page > totalPages) return;
+
+            contactCurrentPage = page;
+            displayContactPage();
+        }
+
+        function updateVisibleTotals() {
+            // Calculate totals for ALL rows (not just visible)
+            let totalPcs = 0;
+            let totalAmount = 0;
+
+            $('#contactTableBody tr').each(function() {
+                // Get quantity from column 3 (index 2)
+                const pcs = parseInt($(this).find('td:eq(2)').text().replace(/,/g, '')) || 0;
+
+                // Get total from column 5 (index 4) - the Total column
+                const rowTotal = parseFloat($(this).find('td:eq(4)').text().replace(/,/g, '')) || 0;
+
+                totalPcs += pcs;
+                totalAmount += rowTotal;
+            });
+
+            // Update footer totals
+            $('#totalPcs').text(totalPcs.toLocaleString());
+            $('#totalPrice').text(totalAmount.toFixed(2));
+        }
+</script>
+
+ <style>
+        #contactTable {
+            font-size: 0.9rem;
+        }
+
+            #contactTable thead th {
+                font-size: 0.75rem;
+                text-transform: uppercase;
+                font-weight: 600;
+                color: #495057;
+                background-color: #f8f9fa;
+                border-bottom: 2px solid #dee2e6;
+            }
+
+            #contactTable tbody tr {
+                transition: background-color 0.2s;
+            }
+
+                #contactTable tbody tr:hover {
+                    background-color: #f1f3f5;
+                }
+
+            #contactTable tfoot {
+                font-size: 1rem;
+                background-color: #f8f9fa;
+                border-top: 2px solid #dee2e6;
+            }
+
+                #contactTable tfoot td {
+                    padding: 1rem 0.75rem;
+                }
+
+        .pagination {
+            margin: 0;
+        }
+
+        .page-link {
+            color: #1b6ec2;
+            border-color: #dee2e6;
+            padding: 0.375rem 0.75rem;
+        }
+
+            .page-link:hover {
+                background-color: #e9ecef;
+                border-color: #dee2e6;
+            }
+
+        .page-item.active .page-link {
+            background-color: #1b6ec2;
+            border-color: #1b6ec2;
+        }
+
+        .page-item.disabled .page-link {
+            color: #6c757d;
+            pointer-events: none;
+            background-color: #fff;
+            border-color: #dee2e6;
+        }
+    </style>
+}

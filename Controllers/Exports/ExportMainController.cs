@@ -5,6 +5,7 @@ using CommercialManagement.Services;
 using CommercialManagement.Services.DropDownSerivces;
 using CommercialManagement.Services.Exports;
 using Microsoft.AspNetCore.Mvc;
+using System.Xml.Linq;
 
 namespace CommercialManagement.Controllers.Exports
 {
@@ -12,7 +13,7 @@ namespace CommercialManagement.Controllers.Exports
     {
         private readonly ILogger<ExportMainController> _logger;
         private readonly ExportMainService _exportMainService;
-        private readonly ExportLCItemsService _exportLCItemsService
+        private readonly ExportLCItemsService _exportLCItemsService;
         private readonly DropDownService _dropDownService;
         public ExportMainController(ILogger<ExportMainController> logger, ExportLCItemsService exportLCItemsService, ExportMainService exportMainService, NotifyingPartyService notifyingPartySerivce, ApplicantConsigneesService applicantConsigneesService, BeneficiaryService beneficiaryService, DropDownService dropDownService)
         {
@@ -51,6 +52,104 @@ namespace CommercialManagement.Controllers.Exports
             List<ExportLCViewModel> exportMainContacts = _exportLCItemsService.GetExportLCItems(LCName);
             return PartialView("_GetContactInfo", exportMainContacts);
         }
-        //private LoadDropdowns
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult AddLCs(ExportMain formData)
+        {
+            try
+            {
+                var userName = HttpContext.Session.GetString("UserName") ?? "System";
+                var ExportLCs = new ExportMain 
+                {
+                    MainExpName = formData.MainExpName?.Trim(),
+                    ReceiveDate = formData.ReceiveDate,
+                    ExpDate = formData.ExpDate,
+                    Dollars = formData.Dollars,
+                    MainExpTaka = formData.MainExpTaka,
+                    ExpQuanity = formData.ExpQuanity,
+                    ApplicantID = formData.ApplicantID,
+                    BenID = formData.BenID,
+                    PartyID = formData.PartyID,
+                    Destination = formData.Destination?.Trim()
+                };
+                bool success = _exportMainService.AddExportMain(ExportLCs);
+                if (success) 
+                {
+                    _logger.LogInformation("LC added Successfully");
+                    return Json(new
+                    {
+                        success = true,
+                        message = $"LC '{formData.MainExpName}' has been added successfully!!!"
+                    });
+                } 
+                else 
+                {
+                    _logger.LogWarning("LC data addition has been failed");
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Failed to add LC. Please try again."
+                    });
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult UpdateLCs(ExportMain formData)
+        {
+            try
+            {
+                var userName = HttpContext.Session.GetString("UserName") ?? "System";
+                var existingLC = _exportMainService.GetbyId(formData.ExpID);
+                if (existingLC == null)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "LC not found."
+                    });
+                }
+
+                existingLC.MainExpName = formData.MainExpName?.Trim();
+                existingLC.ReceiveDate = formData.ReceiveDate;
+                existingLC.ExpDate = formData.ExpDate;
+                existingLC.Dollars = formData.Dollars;
+                existingLC.MainExpTaka = formData.MainExpTaka;
+                existingLC.ExpQuanity = formData.ExpQuanity;
+                existingLC.ApplicantID = formData.ApplicantID;
+                existingLC.BenID = formData.BenID;
+                existingLC.PartyID = formData.PartyID;
+                existingLC.Destination = formData.Destination?.Trim();
+                bool success = _exportMainService.UpdateExportMain(existingLC);
+                if (success)
+                {
+                    _logger.LogInformation("LC updated Successfully");
+                    return Json(new
+                    {
+                        success = true,
+                        message = $"LC '{formData.MainExpName}' has been updated successfully!!!"
+                    });
+                }
+                else
+                {
+                    _logger.LogWarning("LC data Update has been failed");
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Failed to update LC. Please try again."
+                    });
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+        }
     }
 }

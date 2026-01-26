@@ -1,5 +1,6 @@
 ﻿using CommercialManagement.Models.ApplicationDBContext;
 using CommercialManagement.Models.ExpLC;
+using CommercialManagement.Models.Initial_Stage;
 using CommercialManagement.Models.ViewModels;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -16,16 +17,25 @@ namespace CommercialManagement.Services.Exports.ExportsServiceImple
 
         public bool AddExportMain(ExportMain exportMain)
         {
-            throw new NotImplementedException();
+            try
+            {
+                _context.ExportMain.Add(exportMain);
+                int result = _context.SaveChanges();
+                return result > 0;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
-        public ExportMainViewModel GetbyId(int Id)
+        public ExportMain GetbyId(int Id)
         {
             try
             {
-                var exportMainViewModel = _context.ExportMainViewModel
+                var exportMain = _context.ExportMain
                     .FirstOrDefault(c => c.ExpID == Id);
-                return exportMainViewModel;
+                return exportMain;
             }
             catch (Exception)
             {
@@ -52,7 +62,16 @@ namespace CommercialManagement.Services.Exports.ExportsServiceImple
 
         public bool UpdateExportMain(ExportMain exportMain)
         {
-            throw new NotImplementedException();
+            try
+            {
+                _context.ExportMain.Update(exportMain);
+                int result = _context.SaveChanges();
+                return result > 0;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
         
     }
