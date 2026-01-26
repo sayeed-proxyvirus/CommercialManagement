@@ -35,7 +35,8 @@ namespace CommercialManagement.Controllers.Exports
                 return View(new List<ExportMain>());
             }
         }
-        [HttpPost]
+        [HttpGet]
+        //[ValidateAntiForgeryToken]
         public IActionResult GetLCInfo(string LCName) 
         {
             List<ExportMainViewModel> exportMainLCs = _exportMainService.GetExportMain(LCName);

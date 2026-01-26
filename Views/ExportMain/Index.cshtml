@@ -148,7 +148,7 @@
 
                 $.ajax({
                     url: '@Url.Action("GetLCInfo", "ExportMain")',
-                    type: 'POST',
+                    type: 'GET',
                     data: { LCName: lcName },
                     success: function(html) {
                         $('#detailsContainer').html(html);
