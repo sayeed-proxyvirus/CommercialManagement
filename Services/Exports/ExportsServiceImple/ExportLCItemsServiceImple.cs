@@ -1,6 +1,7 @@
 ﻿using CommercialManagement.Models.ApplicationDBContext;
 using CommercialManagement.Models.ExpLC;
 using CommercialManagement.Models.ExportInvoice;
+using CommercialManagement.Models.ViewModels;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
@@ -40,12 +41,12 @@ namespace CommercialManagement.Services.Exports.ExportsServiceImple
                 throw;
             }
         }
-        public List<ExportLCItems> GetExportLCItems(string ExpLCNo)
+        public List<ExportLCViewModel> GetExportLCItems(string ExpLCNo)
         {
             try
             {
                 var param = new SqlParameter("@ExpLCName", ExpLCNo);
-                var exportLC = _context.ExportLCItems
+                var exportLC = _context.ExportLCViewModel
                     .FromSqlRaw("EXEC usp_FindLCContactData @ExpLCName", param)
                     .ToList();
                 return exportLC;

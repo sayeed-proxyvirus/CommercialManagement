@@ -12,12 +12,13 @@ namespace CommercialManagement.Controllers.Exports
     {
         private readonly ILogger<ExportMainController> _logger;
         private readonly ExportMainService _exportMainService;
+        private readonly ExportLCItemsService _exportLCItemsService
         private readonly DropDownService _dropDownService;
-        public ExportMainController(ILogger<ExportMainController> logger, ExportMainService exportMainService, NotifyingPartyService notifyingPartySerivce, ApplicantConsigneesService applicantConsigneesService, BeneficiaryService beneficiaryService, DropDownService dropDownService)
+        public ExportMainController(ILogger<ExportMainController> logger, ExportLCItemsService exportLCItemsService, ExportMainService exportMainService, NotifyingPartyService notifyingPartySerivce, ApplicantConsigneesService applicantConsigneesService, BeneficiaryService beneficiaryService, DropDownService dropDownService)
         {
             _logger = logger;
             _exportMainService = exportMainService;
-
+            _exportLCItemsService = exportLCItemsService;
             _dropDownService = dropDownService;
         }
 
@@ -36,7 +37,6 @@ namespace CommercialManagement.Controllers.Exports
             }
         }
         [HttpGet]
-        //[ValidateAntiForgeryToken]
         public IActionResult GetLCInfo(string LCName) 
         {
             List<ExportMainViewModel> exportMainLCs = _exportMainService.GetExportMain(LCName);
@@ -44,6 +44,12 @@ namespace CommercialManagement.Controllers.Exports
             ViewBag.ListNotify = _dropDownService.GetNotifyingParty();
             ViewBag.ListApplicant = _dropDownService.GetApplicantConsignees();
             return PartialView("_GetLCInfo", exportMainLCs);
+        }
+        [HttpGet]
+        public IActionResult GetContactInfo(string LCName)
+        {
+            List<ExportLCViewModel> exportMainContacts = _exportLCItemsService.GetExportLCItems(LCName);
+            return PartialView("_GetContactInfo", exportMainContacts);
         }
         //private LoadDropdowns
     }

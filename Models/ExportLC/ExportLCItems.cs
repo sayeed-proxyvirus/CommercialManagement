@@ -17,7 +17,7 @@ namespace CommercialManagement.Models.ExpLC
         [Column("TotalPcs")]
         public int? TotalPcs { get; set; }
         [Column("TotalPrice")]
-        public float? TotalPrice { get; set; }
+        public double? TotalPrice { get; set; }
 
     }
 }

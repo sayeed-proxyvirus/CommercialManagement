@@ -56,9 +56,9 @@
                             {
                                 foreach (var applicant in ViewBag.ListApplicant)
                                 {
-                                    <option value="@applicant.AppConsId"
-                                            selected="@(applicant.AppConsId == data?.ApplicantID)">
-                                        @applicant.AppConsName
+                                    <option value="@applicant.ApplicantID"
+                                            selected="@(applicant.ApplicantID == data?.ApplicantID)">
+                                        @applicant.ApplicantName
                                     </option>
                                 }
                             }
@@ -74,9 +74,9 @@
                             {
                                 foreach (var beneficiary in ViewBag.ListBeneficiary)
                                 {
-                                    <option value="@beneficiary.BeneficiaryId"
-                                            selected="@(beneficiary.BeneficiaryId == data?.BenID)">
-                                        @beneficiary.BeneficiaryName
+                                    <option value="@beneficiary.BenID"
+                                            selected="@(beneficiary.BenID == data?.BenID)">
+                                        @beneficiary.BenName
                                     </option>
                                 }
                             }
@@ -92,9 +92,9 @@
                             {
                                 foreach (var notify in ViewBag.ListNotify)
                                 {
-                                    <option value="@notify.NotifingPartyId"
-                                            selected="@(notify.NotifingPartyId == data?.PartyID)">
-                                        @notify.NotifyingPartyName
+                                    <option value="@notify.PartyID"
+                                            selected="@(notify.PartyID == data?.PartyID)">
+                                        @notify.PartyName
                                     </option>
                                 }
                             }
