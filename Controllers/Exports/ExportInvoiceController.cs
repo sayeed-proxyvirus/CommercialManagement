@@ -30,6 +30,8 @@ namespace CommercialManagement.Controllers.Exports
             try
             {
                 List<ExportInvoices> exportInvoices = _dropDownService.GetExportInvoices();
+                //List<ExportMain> exportMainLCs = _dropDownService.GetExportMainLCs();
+                ViewBag.ListExportLC = _dropDownService.GetExportMainLCs();
                 return View(exportInvoices);
             }
             catch (Exception)
@@ -52,14 +54,28 @@ namespace CommercialManagement.Controllers.Exports
                 throw;
             }
         }
-        [HttpGet]
-        public IActionResult GetInvContactInfo(string LCName)
+        public List<ExportLCViewModel> GetInvContactInfo(string LCName)
         {
             try
             {
                 //LCName = "C1B36819643";
                 List<ExportLCViewModel> exportMainContacts = _exportLCItemsService.GetExportLCItems(LCName);
-                return PartialView("_GetInvContactInfo", exportMainContacts);
+                return ViewBag.ListExportLC = _dropDownService.GetExportMainLCs();
+                //return PartialView("_GetInvContactInfo", exportMainContacts);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        [HttpGet]
+        public IActionResult GetContactInfo(string ExpInv)
+        {
+            try
+            {
+                //LCName = "C1B36819643";
+                List<ExportData> invContacts = _exportDataService.GetExportData(ExpInv);
+                return PartialView("_GetInvContactInfo", invContacts);
             }
             catch (Exception)
             {

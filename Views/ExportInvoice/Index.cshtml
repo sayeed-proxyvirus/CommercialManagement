@@ -197,14 +197,11 @@
                 $('#btnSearch').prop('disabled', !val);
             });
 
+            // FIXED: Load invoice info first, then load contact details based on the ExpLCNo from the loaded invoice
             $('#btnSearch').click(function() {
                 const invNo = $('#invSearch').val();
-                const ExpLCNo = $('#ExpLCNo').val(); //ExpLCNo
                 if (invNo) {
                     loadInvoiceInfo(invNo);
-                }///loadExportData(ExpLCNo);
-                if (ExpLCNo) {
-                    loadExportData(ExpLCNo);
                 }
             });
 
@@ -251,15 +248,19 @@
                 data: { ExpInv: invNo },
                 success: function(html) {
                     $('#invInfoContainer').html(html);
+
+                    // FIXED: After loading invoice info, extract the ExpLCNo and load contact details
+                    const expLCNo = $('#expLCNo').val();
+                    if (expLCNo) {
+                        loadExportData(expLCNo);
+                    }
                 },
                 error: function() {
                     $('#invInfoContainer').html(`
                         <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                            Failed to load invoice details. Please try again.
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>Failed to load invoice details. Please try again.
                             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-                    `);
+                        </div>`);
                 }
             });
         }
@@ -438,7 +439,6 @@
 
                         // Load the updated invoice info
                         loadInvoiceInfo(invNo);
-                        loadExportData(invNo);
 
                     } else {
                         showAlert('danger', response.message);
