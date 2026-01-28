@@ -1,0 +1,227 @@
+﻿@model List<CommercialManagement.Models.ViewModels.ExportInvoiceViewModel>
+
+@{
+    var data = Model?.FirstOrDefault();
+}
+
+<div class="card shadow-sm border-0 mb-4" id="invInfoCard" data-expinvid="@(data?.ExpInvID ?? 0)">
+    <div class="card-header bg-light border-bottom d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="bi bi-receipt-cutoff"></i> Export Invoice Details</h5>
+        <button type="button" class="btn-close" onclick="closeInvoiceInfo()"></button>
+    </div>
+    <div class="card-body">
+        <form id="invInfoForm">
+            <div class="row g-3">
+                <!-- Left Column -->
+                <div class="col-md-6">
+                    <!-- Export Invoice No -->
+                    <div class="mb-3">
+                        <label for="expInvNo" class="form-label fw-semibold">EXPORT INVOICE NO:</label>
+                        <input type="text" class="form-control" id="expInvNo"
+                               value="@(data?.ExpInv ?? "")" readonly style="background-color: #e9ecef;">
+                    </div>
+
+                    <!-- Export Date -->
+                    <div class="mb-3">
+                        <label for="exportDate" class="form-label fw-semibold">EXPORT DATE:</label>
+                        <input type="date" class="form-control" id="exportDate"
+                               value="@(data?.ExportDate?.ToString("yyyy-MM-dd") ?? "")" readonly style="background-color: #e9ecef;">
+                    </div>
+
+                    <!-- FDBP No -->
+                    <div class="mb-3">
+                        <label for="fdbpNo" class="form-label fw-semibold">FDBP NO:</label>
+                        <input type="text" class="form-control" id="fdbpNo"
+                               value="@(data?.FDBPNo ?? "")" readonly style="background-color: #e9ecef;">
+                    </div>
+
+                    <!-- FDBP Date -->
+                    <div class="mb-3">
+                        <label for="fdbpDate" class="form-label fw-semibold">FDBP DATE:</label>
+                        <input type="date" class="form-control" id="fdbpDate"
+                               value="@(data?.FDBPDate?.ToString("yyyy-MM-dd") ?? "")" readonly style="background-color: #e9ecef;">
+                    </div>
+
+                    <!-- Shipping Bill -->
+                    <div class="mb-3">
+                        <label for="shipBill" class="form-label fw-semibold">SHIPPING BILL:</label>
+                        <input type="text" class="form-control" id="shipBill"
+                               value="@(data?.ShipBill ?? "")" readonly style="background-color: #e9ecef;">
+                    </div>
+
+                    <!-- Shipping Bill Date -->
+                    <div class="mb-3">
+                        <label for="shipBillDate" class="form-label fw-semibold">SHIPPING BILL DATE:</label>
+                        <input type="date" class="form-control" id="shipBillDate"
+                               value="@(data?.ShipBillDate?.ToString("yyyy-MM-dd") ?? "")" readonly style="background-color: #e9ecef;">
+                    </div>
+                </div>
+
+                <!-- Right Column -->
+                <div class="col-md-6">
+                    <!-- Bill No -->
+                    <div class="mb-3">
+                        <label for="billNo" class="form-label fw-semibold">BILL NO:</label>
+                        <input type="text" class="form-control" id="billNo"
+                               value="@(data?.BillNo ?? "")" readonly style="background-color: #e9ecef;">
+                    </div>
+
+                    <!-- Bill Date -->
+                    <div class="mb-3">
+                        <label for="billDate" class="form-label fw-semibold">BILL DATE:</label>
+                        <input type="date" class="form-control" id="billDate"
+                               value="@(data?.BillDate?.ToString("yyyy-MM-dd") ?? "")" readonly style="background-color: #e9ecef;">
+                    </div>
+
+                    <!-- Exp No -->
+                    <div class="mb-3">
+                        <label for="expNo" class="form-label fw-semibold">EXP NO:</label>
+                        <input type="text" class="form-control" id="expNo"
+                               value="@(data?.ExpNo ?? "")" readonly style="background-color: #e9ecef;">
+                    </div>
+
+                    <!-- Exp Date -->
+                    <div class="mb-3">
+                        <label for="expDate" class="form-label fw-semibold">EXP DATE:</label>
+                        <input type="date" class="form-control" id="expDate"
+                               value="@(data?.ExpDate?.ToString("yyyy-MM-dd") ?? "")" readonly style="background-color: #e9ecef;">
+                    </div>
+
+                    <!-- Export LC No -->
+                    <div class="mb-3">
+                        <label for="expLCNo" class="form-label fw-semibold">EXPORT L/C NO:</label>
+                        <input type="text" class="form-control fw-bold text-primary" id="expLCNo"
+                               value="@(data?.ExpLCNo ?? "")" readonly
+                               style="background-color: #007bff; color: white !important; font-size: 1.1rem;">
+                    </div>
+
+                    <!-- Reference/Remarks -->
+                    <div class="mb-3">
+                        <label for="mainExpRem" class="form-label fw-semibold">REFERENCE/REMARKS:</label>
+                        <input type="text" class="form-control" id="mainExpRem"
+                               value="@(data?.MainExpRem ?? "")" readonly style="background-color: #e9ecef;">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="row mt-4">
+                <div class="col-12 d-flex justify-content-end gap-2">
+                    <button type="button" class="btn btn-secondary" onclick="closeInvoiceInfo()">
+                        <i class="bi bi-x-circle"></i> Close
+                    </button>
+                    <button type="button" class="btn btn-success" onclick="editInvoice()">
+                        <i class="bi bi-pencil"></i> Edit
+                    </button>
+                    <button type="button" class="btn btn-primary" id="btnSaveInv" onclick="saveInvoice()" style="display: none;">
+                        <i class="bi bi-save"></i> Save
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function editInvoice() {
+        console.log('Edit mode activated');
+
+        // Enable all form fields for editing except the Invoice No
+        $('#invInfoForm').find('input:not(#expInvNo)').prop('readonly', false)
+            .css('background-color', '#ffffff');
+
+        // Show Save button, hide Edit button
+        $('#btnSaveInv').show();
+        $('button[onclick="editInvoice()"]').hide();
+
+        showAlert('info', 'Edit mode enabled. Modify the fields and click Save.');
+    }
+
+    function saveInvoice() {
+        console.log('Save Invoice clicked');
+
+        const expInvID = $('#invInfoCard').data('expinvid');
+
+        if (!expInvID || expInvID === 0) {
+            showAlert('danger', 'Error: Export Invoice ID not found');
+            return;
+        }
+
+        const formData = {
+            ExpInvID: parseInt(expInvID),
+            ExpInv: $('#expInvNo').val().trim(),
+            ExportDate: $('#exportDate').val() || null,
+            FDBPNo: $('#fdbpNo').val().trim() || null,
+            FDBPDate: $('#fdbpDate').val() || null,
+            ShipBill: $('#shipBill').val().trim() || null,
+            ShipBillDate: $('#shipBillDate').val() || null,
+            BillNo: $('#billNo').val().trim() || null,
+            BillDate: $('#billDate').val() || null,
+            ExpNo: $('#expNo').val().trim() || null,
+            ExpDate: $('#expDate').val() || null,
+            ExpLCNo: $('#expLCNo').val().trim()
+        };
+
+        // Validate required fields
+        if (!formData.ExpInv || !formData.ExpLCNo) {
+            showAlert('warning', 'Please fill in all required fields');
+            return;
+        }
+
+        $('#btnSaveInv').prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Saving...');
+
+        $.ajax({
+            url: '@Url.Action("UpdateInvoice", "ExportInvoice")',
+            type: 'POST',
+            data: formData,
+            headers: {
+                'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+            },
+            success: function(response) {
+                if (response.success) {
+                    showAlert('success', response.message);
+
+                    // Immediately reload the invoice info without page refresh
+                    const invNo = formData.ExpInv;
+                    loadInvoiceInfo(invNo);
+
+                    // Update dropdown selection
+                    $('#invSearch').val(invNo).trigger('change');
+
+                } else {
+                    showAlert('danger', response.message);
+                    $('#btnSaveInv').prop('disabled', false).html('<i class="bi bi-save"></i> Save');
+                }
+            },
+            error: function(xhr) {
+                showAlert('danger', 'An error occurred while updating the invoice. Please try again.');
+                $('#btnSaveInv').prop('disabled', false).html('<i class="bi bi-save"></i> Save');
+            }
+        });
+    }
+</script>
+
+<style>
+    .form-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        color: #000;
+        margin-bottom: 0.25rem;
+    }
+
+    .form-control:disabled,
+    .form-control[readonly] {
+        background-color: #e9ecef;
+        cursor: not-allowed;
+    }
+
+    #expLCNo {
+        background-color: #007bff;
+        color: #ffffff;
+    }
+
+        #expLCNo:not([readonly]) {
+            background-color: #007bff !important;
+            color: #ffffff !important;
+        }
+</style>

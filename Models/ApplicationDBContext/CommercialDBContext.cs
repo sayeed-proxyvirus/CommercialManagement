@@ -38,6 +38,7 @@ namespace CommercialManagement.Models.ApplicationDBContext
             modelBuilder.Entity<ExportMainViewModel>().HasNoKey();
             modelBuilder.Entity<ExportLCViewModel>().HasNoKey();
             modelBuilder.Entity<ExportInvoiceViewModel>().HasNoKey();
+            modelBuilder.Entity<ExportData>().HasNoKey();
         }         
     }
 }

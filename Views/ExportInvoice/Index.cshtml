@@ -1,5 +1,531 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model List<CommercialManagement.Models.ExportInvoice.ExportInvoices>
 @{
+    ViewData["Title"] = "Export Invoice Management";
 }
+
+<div class="container-fluid">
+    <div id="alertContainer"></div>
+
+    <!-- Search Panel -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0"><i class="bi bi-receipt"></i> Export Invoice Management</h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-8">
+                    <label for="invSearch" class="form-label fw-semibold">
+                        <i class="bi bi-search"></i> EXPORT INVOICE NO:
+                    </label>
+                    <select class="form-select" id="invSearch">
+                        <option value="">-- Select Export Invoice --</option>
+                        @if (Model != null && Model.Any())
+                        {
+                            foreach (var inv in Model)
+                            {
+                                <option value="@inv.ExpInv"
+                                        data-invdate="@(inv.ExportDate?.ToString("yyyy-MM-dd"))">
+                                    @inv.ExpInv
+                                </option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="col-md-4 d-flex align-items-end gap-2">
+                    <button type="button" class="btn btn-success flex-grow-1" id="btnSearch" disabled>
+                        <i class="bi bi-search"></i> Search
+                    </button>
+                    <button type="button" class="btn btn-primary" id="btnAdd">
+                        <i class="bi bi-plus-circle"></i> Add New
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Invoice Info Container (Partial View) -->
+    <div id="invInfoContainer"></div>
+
+    <!-- Export Data Container (Partial View with Table) -->
+    <div id="exportDataContainer"></div>
+</div>
+
+<!-- Add/Edit Invoice Modal -->
+<div class="modal fade" id="exportInvoiceModal" tabindex="-1" aria-labelledby="exportInvoiceModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="exportInvoiceModalLabel">
+                    <i class="bi bi-receipt-cutoff"></i> <span id="modalTitle">Add Export Invoice</span>
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="exportInvoiceForm">
+                <div class="modal-body">
+                    <input type="hidden" id="ExpInvID" name="ExpInvID" value="0" />
+
+                    <div class="row g-3">
+                        <!-- Left Column -->
+                        <div class="col-md-6">
+                            <!-- Export Invoice No -->
+                            <div class="mb-3">
+                                <label for="ExpInv" class="form-label fw-semibold">
+                                    <i class="bi bi-receipt"></i> EXPORT INVOICE NO: <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="ExpInv" name="ExpInv"
+                                       placeholder="Enter Invoice Number" required maxlength="50">
+                                <div class="invalid-feedback">Please enter Invoice Number</div>
+                            </div>
+
+                            <!-- Export Date -->
+                            <div class="mb-3">
+                                <label for="ExportDate" class="form-label fw-semibold">
+                                    <i class="bi bi-calendar"></i> EXPORT DATE:
+                                </label>
+                                <input type="date" class="form-control" id="ExportDate" name="ExportDate">
+                            </div>
+
+                            <!-- FDBP No -->
+                            <div class="mb-3">
+                                <label for="FDBPNo" class="form-label fw-semibold">
+                                    <i class="bi bi-file-text"></i> FDBP NO:
+                                </label>
+                                <input type="text" class="form-control" id="FDBPNo" name="FDBPNo"
+                                       placeholder="Enter FDBP Number" maxlength="50">
+                            </div>
+
+                            <!-- FDBP Date -->
+                            <div class="mb-3">
+                                <label for="FDBPDate" class="form-label fw-semibold">
+                                    <i class="bi bi-calendar-event"></i> FDBP DATE:
+                                </label>
+                                <input type="date" class="form-control" id="FDBPDate" name="FDBPDate">
+                            </div>
+
+                            <!-- Shipping Bill -->
+                            <div class="mb-3">
+                                <label for="ShipBill" class="form-label fw-semibold">
+                                    <i class="bi bi-truck"></i> SHIPPING BILL:
+                                </label>
+                                <input type="text" class="form-control" id="ShipBill" name="ShipBill"
+                                       placeholder="Enter Shipping Bill Number" maxlength="50">
+                            </div>
+
+                            <!-- Shipping Bill Date -->
+                            <div class="mb-3">
+                                <label for="ShipBillDate" class="form-label fw-semibold">
+                                    <i class="bi bi-calendar-check"></i> SHIPPING BILL DATE:
+                                </label>
+                                <input type="date" class="form-control" id="ShipBillDate" name="ShipBillDate">
+                            </div>
+                        </div>
+
+                        <!-- Right Column -->
+                        <div class="col-md-6">
+                            <!-- Bill No -->
+                            <div class="mb-3">
+                                <label for="BillNo" class="form-label fw-semibold">
+                                    <i class="bi bi-file-earmark-text"></i> BILL NO:
+                                </label>
+                                <input type="text" class="form-control" id="BillNo" name="BillNo"
+                                       placeholder="Enter Bill Number" maxlength="50">
+                            </div>
+
+                            <!-- Bill Date -->
+                            <div class="mb-3">
+                                <label for="BillDate" class="form-label fw-semibold">
+                                    <i class="bi bi-calendar"></i> BILL DATE:
+                                </label>
+                                <input type="date" class="form-control" id="BillDate" name="BillDate">
+                            </div>
+
+                            <!-- Exp No -->
+                            <div class="mb-3">
+                                <label for="ExpNo" class="form-label fw-semibold">
+                                    <i class="bi bi-hash"></i> EXP NO:
+                                </label>
+                                <input type="text" class="form-control" id="ExpNo" name="ExpNo"
+                                       placeholder="Enter Exp Number" maxlength="50">
+                            </div>
+
+                            <!-- Exp Date -->
+                            <div class="mb-3">
+                                <label for="ExpDate" class="form-label fw-semibold">
+                                    <i class="bi bi-calendar-event"></i> EXP DATE:
+                                </label>
+                                <input type="date" class="form-control" id="ExpDate" name="ExpDate">
+                            </div>
+
+                            <!-- Export LC No -->
+                            <div class="mb-3">
+                                <label for="ExpLCNo" class="form-label fw-semibold">
+                                    <i class="bi bi-link-45deg"></i> EXPORT L/C NO: <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select" id="ExpLCNo" name="ExpLCNo" required>
+                                    <option value="">-- Select Export LC --</option>
+                                    @if (ViewBag.ListExportLC != null)
+                                    {
+                                        foreach (var lc in ViewBag.ListExportLC)
+                                        {
+                                            <option value="@lc.MainExpName">@lc.MainExpName</option>
+                                        }
+                                    }
+                                </select>
+                                <div class="invalid-feedback">Please select an Export LC</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle"></i> Cancel
+                    </button>
+                    <button type="submit" class="btn btn-success" id="btnSaveInvoice">
+                        <i class="bi bi-save"></i> <span id="btnSaveText">Save Invoice</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('#invSearch').change(function() {
+                const val = $(this).val();
+                $('#btnSearch').prop('disabled', !val);
+            });
+
+            $('#btnSearch').click(function() {
+                const invNo = $('#invSearch').val();
+                const ExpLCNo = $('#ExpLCNo').val(); //ExpLCNo
+                if (invNo) {
+                    loadInvoiceInfo(invNo);
+                }///loadExportData(ExpLCNo);
+                if (ExpLCNo) {
+                    loadExportData(ExpLCNo);
+                }
+            });
+
+            // Handle Add button click
+            $('#btnAdd').click(function() {
+                openAddModal();
+            });
+
+            // Handle form submission
+            $('#exportInvoiceForm').on('submit', function(e) {
+                e.preventDefault();
+
+                // Validate form
+                if (!validateForm()) {
+                    return false;
+                }
+
+                const expInvID = $('#ExpInvID').val();
+                const isEdit = expInvID && expInvID !== '0';
+
+                if (isEdit) {
+                    updateExportInvoice();
+                } else {
+                    addExportInvoice();
+                }
+            });
+        });
+
+        function loadInvoiceInfo(invNo) {
+            $('#invInfoContainer').html(`
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-body text-center py-5">
+                        <div class="spinner-border text-success mb-3" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="text-muted">Loading Invoice Information...</p>
+                    </div>
+                </div>
+            `);
+
+            $.ajax({
+                url: '@Url.Action("GetExpInvInfo", "ExportInvoice")',
+                type: 'GET',
+                data: { ExpInv: invNo },
+                success: function(html) {
+                    $('#invInfoContainer').html(html);
+                },
+                error: function() {
+                    $('#invInfoContainer').html(`
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            Failed to load invoice details. Please try again.
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    `);
+                }
+            });
+        }
+
+        function loadExportData(ExpLCNo) {
+            $('#exportDataContainer').html(`
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-body text-center py-5">
+                        <div class="spinner-border text-success mb-3" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="text-muted">Loading Export Data...</p>
+                    </div>
+                </div>
+            `);
+
+            $.ajax({
+                url: '@Url.Action("GetInvContactInfo", "ExportInvoice")',
+                type: 'GET',
+                data: { LCName: ExpLCNo },
+                success: function(html) {
+                    $('#exportDataContainer').html(html);
+                },
+                error: function() {
+                    $('#exportDataContainer').html(`
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            Failed to load export data. Please try again.
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    `);
+                }
+            });
+        }
+
+        function closeInvoiceInfo() {
+            $('#invInfoContainer').slideUp(400, function() {
+                $(this).empty();
+            });
+        }
+
+        function closeExportData() {
+            $('#exportDataContainer').slideUp(400, function() {
+                $(this).empty();
+            });
+        }
+
+        // Open Add Modal
+        function openAddModal() {
+            // Reset form
+            $('#exportInvoiceForm')[0].reset();
+            $('#ExpInvID').val('0');
+
+            // Update modal title
+            $('#modalTitle').text('Add Export Invoice');
+            $('#btnSaveText').text('Save Invoice');
+
+            // Clear validation
+            $('#exportInvoiceForm').removeClass('was-validated');
+            $('.form-control, .form-select').removeClass('is-invalid');
+
+            // Show modal
+            $('#exportInvoiceModal').modal('show');
+        }
+
+        // Validate form
+        function validateForm() {
+            let isValid = true;
+
+            // Clear previous validation
+            $('.form-control, .form-select').removeClass('is-invalid');
+
+            // Check required fields
+            if (!$('#ExpInv').val().trim()) {
+                $('#ExpInv').addClass('is-invalid');
+                isValid = false;
+            }
+
+            if (!$('#ExpLCNo').val()) {
+                $('#ExpLCNo').addClass('is-invalid');
+                isValid = false;
+            }
+
+            if (!isValid) {
+                showAlert('warning', 'Please fill in all required fields');
+            }
+
+            return isValid;
+        }
+
+        // Add Export Invoice
+        function addExportInvoice() {
+            const formData = {
+                ExpInv: $('#ExpInv').val().trim(),
+                ExportDate: $('#ExportDate').val() || null,
+                FDBPNo: $('#FDBPNo').val().trim() || null,
+                FDBPDate: $('#FDBPDate').val() || null,
+                ShipBill: $('#ShipBill').val().trim() || null,
+                ShipBillDate: $('#ShipBillDate').val() || null,
+                BillNo: $('#BillNo').val().trim() || null,
+                BillDate: $('#BillDate').val() || null,
+                ExpNo: $('#ExpNo').val().trim() || null,
+                ExpDate: $('#ExpDate').val() || null,
+                ExpLCNo: $('#ExpLCNo').val()
+            };
+
+            // Disable submit button
+            $('#btnSaveInvoice').prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Saving...');
+
+            $.ajax({
+                url: '@Url.Action("AddInvoice", "ExportInvoice")',
+                type: 'POST',
+                data: formData,
+                headers: {
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(response) {
+                    if (response.success) {
+                        showAlert('success', response.message);
+                        $('#exportInvoiceModal').modal('hide');
+
+                        // Reload the page to refresh invoice dropdown
+                        setTimeout(function() {
+                            location.reload();
+                        }, 1500);
+                    } else {
+                        showAlert('danger', response.message);
+                    }
+                },
+                error: function(xhr) {
+                    showAlert('danger', 'An error occurred while adding the invoice. Please try again.');
+                    console.error('Error:', xhr);
+                },
+                complete: function() {
+                    $('#btnSaveInvoice').prop('disabled', false).html('<i class="bi bi-save"></i> Save Invoice');
+                }
+            });
+        }
+
+        // Update Export Invoice
+        function updateExportInvoice() {
+            const formData = {
+                ExpInvID: parseInt($('#ExpInvID').val()),
+                ExpInv: $('#ExpInv').val().trim(),
+                ExportDate: $('#ExportDate').val() || null,
+                FDBPNo: $('#FDBPNo').val().trim() || null,
+                FDBPDate: $('#FDBPDate').val() || null,
+                ShipBill: $('#ShipBill').val().trim() || null,
+                ShipBillDate: $('#ShipBillDate').val() || null,
+                BillNo: $('#BillNo').val().trim() || null,
+                BillDate: $('#BillDate').val() || null,
+                ExpNo: $('#ExpNo').val().trim() || null,
+                ExpDate: $('#ExpDate').val() || null,
+                ExpLCNo: $('#ExpLCNo').val()
+            };
+
+            $('#btnSaveInvoice').prop('disabled', true)
+                .html('<span class="spinner-border spinner-border-sm me-2"></span>Updating...');
+
+            $.ajax({
+                url: '@Url.Action("UpdateInvoice", "ExportInvoice")',
+                type: 'POST',
+                data: formData,
+                headers: {
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(response) {
+                    if (response.success) {
+                        showAlert('success', response.message);
+                        $('#exportInvoiceModal').modal('hide');
+
+                        // Update dropdown and reload data
+                        const invNo = formData.ExpInv;
+                        $('#invSearch').append(`<option value="${invNo}" selected>${invNo}</option>`);
+                        $('#invSearch').val(invNo).trigger('change');
+
+                        // Load the updated invoice info
+                        loadInvoiceInfo(invNo);
+                        loadExportData(invNo);
+
+                    } else {
+                        showAlert('danger', response.message);
+                    }
+                },
+                error: function(xhr) {
+                    showAlert('danger', 'An error occurred. Please try again.');
+                },
+                complete: function() {
+                    $('#btnSaveInvoice').prop('disabled', false)
+                        .html('<i class="bi bi-save"></i> Update Invoice');
+                }
+            });
+        }
+
+        // Show alert helper
+        function showAlert(type, message) {
+            const icons = {
+                success: 'check-circle',
+                danger: 'exclamation-triangle',
+                warning: 'exclamation-circle',
+                info: 'info-circle'
+            };
+
+            const alertHtml = `
+                <div class="alert alert-${type} alert-dismissible fade show shadow-sm" role="alert">
+                    <i class="bi bi-${icons[type]}"></i> ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `;
+
+            $('#alertContainer').html(alertHtml);
+
+            // Auto dismiss after 5 seconds
+            setTimeout(function() {
+                $('.alert').fadeOut(400, function() {
+                    $(this).remove();
+                });
+            }, 5000);
+
+            // Scroll to top to show alert
+            $('html, body').animate({ scrollTop: 0 }, 300);
+        }
+    </script>
+}
+
+<style>
+    .form-label {
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .card {
+        border-radius: 12px;
+    }
+
+    .btn:hover {
+        transform: translateY(-1px);
+        transition: transform 0.2s;
+    }
+
+    #invSearch {
+        font-size: 1rem;
+    }
+
+    .form-label {
+        font-size: 0.85rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .modal-body {
+        max-height: 70vh;
+        overflow-y: auto;
+    }
+
+    .invalid-feedback {
+        display: none;
+        font-size: 0.875rem;
+    }
+
+    .form-control.is-invalid,
+    .form-select.is-invalid {
+        border-color: #dc3545;
+    }
+
+        .form-control.is-invalid ~ .invalid-feedback,
+        .form-select.is-invalid ~ .invalid-feedback {
+            display: block;
+        }
+</style>

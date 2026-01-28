@@ -1,0 +1,366 @@
+﻿@model List<CommercialManagement.Models.ViewModels.ExportLCViewModel>
+
+@{
+    var totalPcs = Model?.Sum(x => x.TotalPcs ?? 0) ?? 0;
+    var totalPrice = Model?.Sum(x => x.TotalPrice ?? 0) ?? 0;
+}
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-info text-white border-bottom d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="bi bi-list-check"></i> LC Contact Items</h5>
+        <button type="button" class="btn-close btn-close-white" onclick="closeInvContactInfo()"></button>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover table-striped align-middle mb-0" id="invContactTable">
+                <thead class="table-light">
+                    <tr>
+                        <th class="px-3" style="width: 80px;">#</th>
+                        <th style="width: 130px;">Contact NO</th>
+                        <th>Export LC No</th>
+                        <th>Style Description</th>
+                        <th class="text-end" style="width: 120px;">Total Pcs</th>
+                        <th class="text-end" style="width: 130px;">Total Price $</th>
+                        <th class="text-end" style="width: 150px;">Amount</th>
+                    </tr>
+                </thead>
+                <tbody id="invContactTableBody">
+                    @if (Model != null && Model.Any())
+                    {
+                        int rowNumber = 1;
+                        foreach (var item in Model)
+                        {
+                            <tr data-contactid="@item.ContactId">
+                                <td class="px-3 text-muted">@rowNumber</td>
+                                <td>
+                                    <span class="badge bg-info">@(item.ContactNo ?? "-")</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-primary">@(item.ExpLCNo ?? "-")</span>
+                                </td>
+                                <td class="fw-medium">@(item.StyleDesc ?? "Not specified")</td>
+                                <td class="text-end">@((item.TotalPcs ?? 0).ToString("N0"))</td>
+                                <td class="text-end">@((item.TotalPrice ?? 0).ToString("N4"))</td>
+                                <td class="text-end fw-bold text-success">
+                                    $ @(((item.TotalPcs ?? 0) * (item.TotalPrice ?? 0)).ToString("N2"))
+                                </td>
+                            </tr>
+                            rowNumber++;
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center py-5 text-muted">
+                                <i class="bi bi-inbox fs-1 d-block mb-3"></i>
+                                <p class="mb-0">No LC contact items found</p>
+                                <small class="text-muted">Contact items will appear here when available</small>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+                @if (Model != null && Model.Any())
+                {
+                    <tfoot class="table-light fw-bold">
+                        <tr>
+                            <td colspan="4" class="px-3 text-end">
+                                <strong>Grand Total:</strong>
+                            </td>
+                            <td class="text-end">
+                                <span id="grandTotalPcs">@totalPcs.ToString("N0")</span> Pcs
+                            </td>
+                            <td class="text-end">
+                                <span class="badge bg-primary">Avg: $@((totalPcs > 0 ? totalPrice / totalPcs : 0).ToString("N4"))</span>
+                            </td>
+                            <td class="text-end text-success">
+                                $ <span id="grandTotalAmount">@totalPrice.ToString("N2")</span>
+                            </td>
+                        </tr>
+                    </tfoot>
+                }
+            </table>
+        </div>
+
+        @if (Model != null && Model.Any())
+        {
+            <div class="card-footer bg-white border-top">
+                <div class="d-flex justify-content-between align-items-center">
+                    <small class="text-muted">
+                        <i class="bi bi-info-circle"></i>
+                        Showing <span id="contactPageInfo">1 to @Math.Min(15, Model.Count) of @Model.Count</span> items
+                    </small>
+                    <div id="contactPaginationContainer"></div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+    $(document).ready(function() {
+        initializeInvContactPagination();
+    });
+
+    // Pagination variables
+    let invContactCurrentPage = 1;
+    const invContactRowsPerPage = 15;
+    let invContactAllRows = [];
+
+    function initializeInvContactPagination() {
+        invContactAllRows = $('#invContactTableBody tr').toArray();
+        if (invContactAllRows.length > 0 && !$('#invContactTableBody tr td[colspan]').length) {
+            displayInvContactPage();
+        }
+    }
+
+    function displayInvContactPage() {
+        const totalPages = Math.ceil(invContactAllRows.length / invContactRowsPerPage);
+        const start = (invContactCurrentPage - 1) * invContactRowsPerPage;
+        const end = start + invContactRowsPerPage;
+
+        // Show/hide rows
+        invContactAllRows.forEach((row, index) => {
+            $(row).toggle(index >= start && index < end);
+        });
+
+        // Update footer and pagination
+        updateInvContactFooter(start, end);
+        renderInvContactPagination(totalPages);
+        updateVisibleInvContactTotals();
+    }
+
+    function updateInvContactFooter(start, end) {
+        const total = invContactAllRows.length;
+        const displayStart = total > 0 ? start + 1 : 0;
+        const displayEnd = Math.min(end, total);
+        $('#contactPageInfo').text(`${displayStart} to ${displayEnd} of ${total}`);
+    }
+
+    function renderInvContactPagination(totalPages) {
+        if (totalPages <= 1) {
+            $('#contactPaginationContainer').empty();
+            return;
+        }
+
+        const createPageItem = (page, text, disabled = false, active = false) => {
+            const disabledClass = disabled ? 'disabled' : '';
+            const activeClass = active ? 'active' : '';
+            const onclick = !disabled && !active ? `onclick="changeInvContactPage(${page}); return false;"` : '';
+            return `<li class="page-item ${disabledClass} ${activeClass}">
+                        <a class="page-link" href="#" ${onclick}>${text}</a>
+                    </li>`;
+        };
+
+        let html = '<nav><ul class="pagination pagination-sm mb-0">';
+
+        // Previous button
+        html += createPageItem(invContactCurrentPage - 1, '<i class="bi bi-chevron-left"></i>', invContactCurrentPage === 1);
+
+        // Page numbers
+        const maxPages = 5;
+        let startPage = Math.max(1, invContactCurrentPage - Math.floor(maxPages / 2));
+        let endPage = Math.min(totalPages, startPage + maxPages - 1);
+
+        if (endPage - startPage < maxPages - 1) {
+            startPage = Math.max(1, endPage - maxPages + 1);
+        }
+
+        if (startPage > 1) {
+            html += createPageItem(1, '1');
+            if (startPage > 2) html += '<li class="page-item disabled"><span class="page-link">...</span></li>';
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+            html += createPageItem(i, i, false, i === invContactCurrentPage);
+        }
+
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) html += '<li class="page-item disabled"><span class="page-link">...</span></li>';
+            html += createPageItem(totalPages, totalPages);
+        }
+
+        // Next button
+        html += createPageItem(invContactCurrentPage + 1, '<i class="bi bi-chevron-right"></i>', invContactCurrentPage === totalPages);
+
+        html += '</ul></nav>';
+        $('#contactPaginationContainer').html(html);
+    }
+
+    function changeInvContactPage(page) {
+        const totalPages = Math.ceil(invContactAllRows.length / invContactRowsPerPage);
+        if (page < 1 || page > totalPages) return;
+        invContactCurrentPage = page;
+        displayInvContactPage();
+    }
+
+    function updateVisibleInvContactTotals() {
+        let totalPcs = 0;
+        let totalAmount = 0;
+
+        $('#invContactTableBody tr:visible').each(function() {
+            const pcs = parseInt($(this).find('td:eq(4)').text().replace(/,/g, '')) || 0;
+            const amount = parseFloat($(this).find('td:eq(6)').text().replace(/[$,]/g, '')) || 0;
+            totalPcs += pcs;
+            totalAmount += amount;
+        });
+
+        $('#grandTotalPcs').text(totalPcs.toLocaleString());
+        $('#grandTotalAmount').text(totalAmount.toFixed(2));
+    }
+
+    function closeInvContactInfo() {
+        $('#invContactContainer').slideUp(400, function() {
+            $(this).empty();
+        });
+    }
+</script>
+
+<style>
+    #invContactTable {
+        font-size: 0.9rem;
+    }
+
+        #invContactTable thead th {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            font-weight: 600;
+            color: #495057;
+            background-color: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        #invContactTable tbody tr {
+            transition: background-color 0.2s;
+        }
+
+            #invContactTable tbody tr:hover {
+                background-color: #e7f5ff;
+            }
+
+        #invContactTable tfoot {
+            font-size: 1rem;
+            background-color: #f8f9fa;
+            border-top: 2px solid #dee2e6;
+        }
+
+            #invContactTable tfoot td {
+                padding: 1rem 0.75rem;
+            }
+
+    .badge {
+        padding: 0.4em 0.65em;
+        font-weight: 500;
+        font-size: 0.85rem;
+    }
+
+    .pagination {
+        margin: 0;
+    }
+
+    .page-link {
+        color: #17a2b8;
+        border-color: #dee2e6;
+        padding: 0.375rem 0.75rem;
+    }
+
+        .page-link:hover {
+            background-color: #e9ecef;
+            border-color: #dee2e6;
+            color: #117a8b;
+        }
+
+    .page-item.active .page-link {
+        background-color: #17a2b8;
+        border-color: #17a2b8;
+    }
+
+    .page-item.disabled .page-link {
+        color: #6c757d;
+        pointer-events: none;
+        background-color: #fff;
+        border-color: #dee2e6;
+    }
+
+    /* Smooth scrolling for table */
+    .table-responsive {
+        max-height: 500px;
+        overflow-y: auto;
+    }
+
+        /* Custom scrollbar */
+        .table-responsive::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        .table-responsive::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .table-responsive::-webkit-scrollbar-thumb {
+            background: #17a2b8;
+            border-radius: 10px;
+        }
+
+            .table-responsive::-webkit-scrollbar-thumb:hover {
+                background: #117a8b;
+            }
+
+    /* Empty state styling */
+    #invContactTable tbody td[colspan] {
+        padding: 3rem 1rem;
+    }
+
+        #invContactTable tbody td[colspan] i {
+            color: #adb5bd;
+        }
+
+    /* Highlight row on hover with animation */
+    @@keyframes highlightRow {
+        0%
+
+    {
+        background-color: transparent;
+    }
+
+    50% {
+        background-color: #d1ecf1;
+    }
+
+    100% {
+        background-color: #e7f5ff;
+    }
+
+    }
+
+    #invContactTable tbody tr:hover {
+        animation: highlightRow 0.3s ease-in-out forwards;
+    }
+
+    /* Card styling */
+    .card-header.bg-info {
+        background: linear-gradient(135deg, #17a2b8 0%, #117a8b 100%);
+    }
+
+    /* Footer info icon animation */
+    @@keyframes pulse-info {
+        0%, 100%
+
+    {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.7;
+    }
+
+    }
+
+    .card-footer .bi-info-circle {
+        animation: pulse-info 2s infinite;
+    }
+</style>
