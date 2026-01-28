@@ -90,9 +90,18 @@
                     <!-- Export LC No -->
                     <div class="mb-3">
                         <label for="expLCNo" class="form-label fw-semibold">EXPORT L/C NO:</label>
-                        <input type="text" class="form-control fw-bold text-primary" id="expLCNo"
-                               value="@(data?.ExpLCNo ?? "")" readonly
-                               style="background-color: #007bff; color: white !important; font-size: 1.1rem;">
+                        <select class="form-select fw-bold" id="expLCNo" name="expLCNo" disabled
+                                style="background-color: #007bff; color: white !important; font-size: 1.1rem;">
+                            @if (ViewBag.ListExportLC != null)
+                            {
+                                foreach (var lc in ViewBag.ListExportLC)
+                                {
+                                    <option value="@lc.MainExpName" selected="@(lc.MainExpName == data?.ExpLCNo)">
+                                        @lc.MainExpName
+                                    </option>
+                                }
+                            }
+                        </select>
                     </div>
 
                     <!-- Reference/Remarks -->
@@ -129,6 +138,11 @@
         // Enable all form fields for editing except the Invoice No
         $('#invInfoForm').find('input:not(#expInvNo)').prop('readonly', false)
             .css('background-color', '#ffffff');
+
+        // Enable the Export LC dropdown
+        $('#expLCNo').prop('disabled', false)
+            .css('background-color', '#ffffff')
+            .css('color', '#000000');
 
         // Show Save button, hide Edit button
         $('#btnSaveInv').show();
@@ -210,7 +224,8 @@
     }
 
     .form-control:disabled,
-    .form-control[readonly] {
+    .form-control[readonly],
+    .form-select:disabled {
         background-color: #e9ecef;
         cursor: not-allowed;
     }
@@ -220,8 +235,13 @@
         color: #ffffff;
     }
 
-        #expLCNo:not([readonly]) {
-            background-color: #007bff !important;
-            color: #ffffff !important;
+        #expLCNo:not([disabled]) {
+            background-color: #ffffff !important;
+            color: #000000 !important;
+        }
+
+        #expLCNo option {
+            background-color: #ffffff;
+            color: #000000;
         }
 </style>

@@ -30,7 +30,6 @@ namespace CommercialManagement.Controllers.Exports
             try
             {
                 List<ExportInvoices> exportInvoices = _dropDownService.GetExportInvoices();
-                //List<ExportMain> exportMainLCs = _dropDownService.GetExportMainLCs();
                 ViewBag.ListExportLC = _dropDownService.GetExportMainLCs();
                 return View(exportInvoices);
             }
@@ -40,13 +39,14 @@ namespace CommercialManagement.Controllers.Exports
                 return View(new List<ExportInvoices>());
             }
         }
+
         [HttpGet]
         public IActionResult GetExpInvInfo(string ExpInv)
         {
             try
             {
-                //ExpInv = "M00L/INV/1427/08";
                 List<ExportInvoiceViewModel> exportInvoice = _exportInvoiceService.GetExportInvoices(ExpInv);
+                ViewBag.ListExportLC = _dropDownService.GetExportMainLCs();
                 return PartialView("_GetInvInfo", exportInvoice);
             }
             catch (Exception)
@@ -54,32 +54,51 @@ namespace CommercialManagement.Controllers.Exports
                 throw;
             }
         }
-        public List<ExportLCViewModel> GetInvContactInfo(string LCName)
+
+        [HttpGet]
+        public IActionResult GetInvContactInfo(string LCName)
         {
             try
             {
-                //LCName = "C1B36819643";
                 List<ExportLCViewModel> exportMainContacts = _exportLCItemsService.GetExportLCItems(LCName);
-                return ViewBag.ListExportLC = _dropDownService.GetExportMainLCs();
-                //return PartialView("_GetInvContactInfo", exportMainContacts);
+
+                // Return JSON for dropdown
+                var contacts = exportMainContacts.Select(c => new
+                {
+                    contactNo = c.ContactNo,
+                    contactId = c.ContactId
+                }).ToList();
+
+                return Json(contacts);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                _logger.LogError(ex, "Error loading contacts for LC: {LCName}", LCName);
+                return Json(new List<object>());
             }
         }
+
         [HttpGet]
         public IActionResult GetContactInfo(string ExpInv)
         {
             try
             {
-                //LCName = "C1B36819643";
-                List<ExportData> invContacts = _exportDataService.GetExportData(ExpInv);
-                return PartialView("_GetInvContactInfo", invContacts);
+                var invoices = _exportInvoiceService.GetExportInvoices(ExpInv);
+                var invoice = invoices?.FirstOrDefault();
+
+                if (invoice == null || string.IsNullOrEmpty(invoice.ExpLCNo))
+                {
+                    return PartialView("_GetInvContactInfo", new List<ExportLCViewModel>());
+                }
+
+                // Get contacts from LC
+                List<ExportLCViewModel> contacts = _exportLCItemsService.GetExportLCItems(invoice.ExpLCNo);
+                return PartialView("_GetInvContactInfo", contacts);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                _logger.LogError(ex, "Error loading contact info for ExpInv: {ExpInv}", ExpInv);
+                return PartialView("_GetInvContactInfo", new List<ExportLCViewModel>());
             }
         }
 
@@ -219,7 +238,7 @@ namespace CommercialManagement.Controllers.Exports
                     return Json(new
                     {
                         success = true,
-                        message = $"Export data for '{formData.ContactNo}' has been added successfully!"
+                        message = $"Export data for contact '{formData.ContactNo}' has been added successfully!"
                     });
                 }
                 else
@@ -250,7 +269,8 @@ namespace CommercialManagement.Controllers.Exports
             try
             {
                 var userName = HttpContext.Session.GetString("UserName") ?? "System";
-                var existingData = _exportDataService.GetbyId(formData.ContactID ?? 0);
+                var allData = _exportDataService.GetExportData(formData.ExpInv);
+                var existingData = allData?.FirstOrDefault(d => d.ContactNo == formData.ContactNo);
 
                 if (existingData == null)
                 {
@@ -261,8 +281,6 @@ namespace CommercialManagement.Controllers.Exports
                     });
                 }
 
-                existingData.ExpInv = formData.ExpInv?.Trim();
-                existingData.ContactNo = formData.ContactNo?.Trim();
                 existingData.ExpQuantity = formData.ExpQuantity;
                 existingData.UnitPrice = formData.UnitPrice;
 
@@ -273,7 +291,7 @@ namespace CommercialManagement.Controllers.Exports
                     return Json(new
                     {
                         success = true,
-                        message = $"Export data for '{formData.ContactNo}' has been updated successfully!"
+                        message = $"Export data for contact '{formData.ContactNo}' has been updated successfully!"
                     });
                 }
                 else
