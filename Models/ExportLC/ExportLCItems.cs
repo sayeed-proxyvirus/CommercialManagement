@@ -7,7 +7,7 @@ namespace CommercialManagement.Models.ExpLC
     public class ExportLCItems
     {
         [Key]
-        //[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Column("ContactId")]
         public int ContactId { get; set; }
         [Column("ExpLCNo")]

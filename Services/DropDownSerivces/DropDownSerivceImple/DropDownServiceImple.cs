@@ -103,7 +103,7 @@ namespace CommercialManagement.Services.DropDownSerivces.DropDownSerivceImple
             try
             {
                 //var param = new SqlParameter("@ExpLCName", ExpLCName);
-                var exportMainViewModel = _context.ExportMain
+                var exportMainViewModel = _context.ExportMain////main model load hoy viewmodel na arki
                     .FromSqlRaw("EXEC usp_ViewExpLC")
                     .ToList();
                 return exportMainViewModel;
@@ -116,7 +116,17 @@ namespace CommercialManagement.Services.DropDownSerivces.DropDownSerivceImple
 
         public List<ExportInvoices> GetExportInvoices()
         {
-            throw new NotImplementedException();
+            try
+            {
+                var exportInvoice = _context.ExportInvoices
+                    .FromSqlRaw("EXEC usp_ViewExpInv")
+                    .ToList();
+                return exportInvoice;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
     }
 }

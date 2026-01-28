@@ -24,6 +24,7 @@ namespace CommercialManagement.Models.ApplicationDBContext
         public DbSet<ExportInvoices> ExportInvoices { get; set; }
         public DbSet<ExportMain> ExportMain { get; set; }
         public DbSet<ExportMainViewModel> ExportMainViewModel { get; set; }
+        public DbSet<ExportInvoiceViewModel> ExportInvoiceViewModel { get; set; }
         public DbSet<ExportLCItems> ExportLCItems { get; set; }
         public DbSet<ExportLCViewModel> ExportLCViewModel { get; set; }
         public DbSet<StyleInfo> StyleInfo { get; set; }
@@ -36,6 +37,7 @@ namespace CommercialManagement.Models.ApplicationDBContext
             modelBuilder.Entity<CutData>().HasNoKey();
             modelBuilder.Entity<ExportMainViewModel>().HasNoKey();
             modelBuilder.Entity<ExportLCViewModel>().HasNoKey();
+            modelBuilder.Entity<ExportInvoiceViewModel>().HasNoKey();
         }         
     }
 }

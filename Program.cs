@@ -43,7 +43,7 @@ builder.Services.AddScoped<FabricsService, FabricsServiceImple>();
 builder.Services.AddScoped<DynamicMenuService, DynamicMenuServiceImple>();
 builder.Services.AddScoped<ExportDataService, ExportDataServiceImple>();
 builder.Services.AddScoped<DropDownService, DropDownServiceImple>();
-//builder.Services.AddScoped<ExportInvoiceService, ExportInvoiceServiceImple>();
+builder.Services.AddScoped<ExportInvoiceService, ExportInvoiceServiceImple>();
 builder.Services.AddScoped<ExportMainService, ExportMainServiceImple>();
 builder.Services.AddScoped<ExportLCItemsService, ExportLCItemsServiceImple>();
 

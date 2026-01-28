@@ -156,20 +156,16 @@
         showAlert('info', 'Edit mode enabled. Modify the fields and click Save.');
     }
 
-    function saveLC() {
+        function saveLC() {
         console.log('Save LC clicked');
-        
-        // Get ExpID from the card's data attribute
+
         const expID = $('#lcInfoCard').data('expid');
-        
-        console.log('ExpID:', expID);
-        
+
         if (!expID || expID === 0) {
             showAlert('danger', 'Error: Export LC ID not found');
             return;
         }
-        
-        // Collect form data from the actual input fields
+
         const formData = {
             ExpID: parseInt(expID),
             MainExpName: $('#exportLCNo').val().trim(),
@@ -184,41 +180,14 @@
             PartyID: parseInt($('#notify').val()) || null,
             Destination: $('#destination').val().trim() || null
         };
-        
-        console.log('Form Data being sent:', formData);
-        
+
         // Validate required fields
-        if (!formData.MainExpName) {
-            showAlert('warning', 'LC Number is required');
-            return;
-        }
-        
-        if (!formData.ReceiveDate) {
-            showAlert('warning', 'LC Date is required');
-            return;
-        }
-        
-        if (!formData.Dollars || formData.Dollars <= 0) {
-            showAlert('warning', 'Total Value must be greater than 0');
-            return;
-        }
-        
-        if (!formData.ApplicantID) {
-            showAlert('warning', 'Please select an Applicant');
-            return;
-        }
-        
-        if (!formData.BenID) {
-            showAlert('warning', 'Please select a Beneficiary');
-            return;
-        }
-        
-        if (!formData.PartyID) {
-            showAlert('warning', 'Please select a Notify Party');
+        if (!formData.MainExpName || !formData.ReceiveDate || !formData.Dollars ||
+            !formData.ApplicantID || !formData.BenID || !formData.PartyID) {
+            showAlert('warning', 'Please fill in all required fields');
             return;
         }
 
-        // Disable save button
         $('#btnSaveLC').prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Saving...');
 
         $.ajax({
@@ -229,40 +198,23 @@
                 'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
             },
             success: function(response) {
-                console.log('Server Response:', response);
-                
                 if (response.success) {
                     showAlert('success', response.message);
-                    
-                    // Disable fields again
-                    $('#lcInfoForm').find('input, select').prop('disabled', true)
-                        .css('background-color', '#e9ecef');
-                    $('#lcInfoForm').find('input').prop('readonly', true);
-                    
-                    // Hide Save button, show Edit button
-                    $('#btnSaveLC').hide();
-                    $('button[onclick="editLC()"]').show();
-                    
-                    // Reload the LC info after a short delay
+
+                    // Immediately reload the LC info without page refresh
                     const lcName = formData.MainExpName;
-                    setTimeout(function() {
-                        if (typeof loadLCInfo === 'function') {
-                            loadLCInfo(lcName);
-                        }
-                        // Update the dropdown selection
-                        $('#lcSearch').val(lcName);
-                    }, 1000);
-                    
+                    loadLCInfo(lcName);
+
+                    // Update dropdown selection
+                    $('#lcSearch').val(lcName).trigger('change');
+
                 } else {
                     showAlert('danger', response.message);
+                    $('#btnSaveLC').prop('disabled', false).html('<i class="bi bi-save"></i> Save');
                 }
             },
-            error: function(xhr, status, error) {
-                console.error('AJAX Error:', status, error);
-                console.error('Response:', xhr.responseText);
+            error: function(xhr) {
                 showAlert('danger', 'An error occurred while updating the LC. Please try again.');
-            },
-            complete: function() {
                 $('#btnSaveLC').prop('disabled', false).html('<i class="bi bi-save"></i> Save');
             }
         });

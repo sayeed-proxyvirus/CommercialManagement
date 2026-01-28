@@ -368,17 +368,17 @@
                     showAlert('success', response.message);
                     $('#contactModal').modal('hide');
 
+                    // Immediately reload contact details
                     const lcName = $('#lcSearch').val();
                     if (lcName) {
-                        setTimeout(() => loadContactDetails(lcName), 1000);
+                        loadContactDetails(lcName);
                     }
                 } else {
                     showAlert('danger', response.message);
                 }
             },
             error: function(xhr) {
-                showAlert('danger', 'An error occurred while adding the contact. Please try again.');
-                console.error('Error:', xhr);
+                showAlert('danger', 'An error occurred. Please try again.');
             },
             complete: function() {
                 $('#btnSaveContact').prop('disabled', false)
@@ -396,7 +396,7 @@
             TotalPcs: parseInt($('#contactTotalPcs').val()),
             TotalPrice: parseFloat($('#contactTotalPrice').val())
         };
-        console.log(formData);
+
         $('#btnSaveContact').prop('disabled', true)
             .html('<span class="spinner-border spinner-border-sm me-2"></span>Updating...');
 
@@ -410,17 +410,17 @@
                     showAlert('success', response.message);
                     $('#contactModal').modal('hide');
 
+                    // Immediately reload contact details
                     const lcName = $('#lcSearch').val();
                     if (lcName) {
-                        setTimeout(() => loadContactDetails(lcName), 1000);
+                        loadContactDetails(lcName);
                     }
                 } else {
                     showAlert('danger', response.message);
                 }
             },
             error: function(xhr) {
-                showAlert('danger', 'An error occurred while updating the contact. Please try again.');
-                console.error('Error:', xhr);
+                showAlert('danger', 'An error occurred. Please try again.');
             },
             complete: function() {
                 $('#btnSaveContact').prop('disabled', false)

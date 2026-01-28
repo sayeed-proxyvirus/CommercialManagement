@@ -30,9 +30,7 @@ namespace CommercialManagement.Models.ExportInvoice
         public string? ExpNo { get; set; }
         [Column("ExpDate")]
         public DateTime? ExpDate { get; set; }
-        [Column("ExpID")]
-        public int ExpID { get; set; }
         [Column("ExpLCNo")]
-        public int? ExpLCNo { get; set; }
+        public string? ExpLCNo { get; set; }
     }
 }

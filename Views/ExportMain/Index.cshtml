@@ -251,7 +251,16 @@
         });
 
         function loadLCInfo(lcName) {
-            $('#lcInfoContainer').html('<div class="text-center py-4"><div class="spinner-border"></div></div>');
+            $('#lcInfoContainer').html(`
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-body text-center py-5">
+                        <div class="spinner-border text-primary mb-3" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="text-muted">Loading LC Information...</p>
+                    </div>
+                </div>
+            `);
 
             $.ajax({
                 url: '@Url.Action("GetLCInfo", "ExportMain")',
@@ -261,13 +270,28 @@
                     $('#lcInfoContainer').html(html);
                 },
                 error: function() {
-                    $('#lcInfoContainer').html('<div class="alert alert-danger">Failed to load LC details</div>');
+                    $('#lcInfoContainer').html(`
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            Failed to load LC details. Please try again.
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    `);
                 }
             });
         }
 
         function loadContactDetails(lcName) {
-            $('#contactDetailsContainer').html('<div class="text-center py-4"><div class="spinner-border"></div></div>');
+            $('#contactDetailsContainer').html(`
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-body text-center py-5">
+                        <div class="spinner-border text-primary mb-3" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="text-muted">Loading Contact Details...</p>
+                    </div>
+                </div>
+            `);
 
             $.ajax({
                 url: '@Url.Action("GetContactInfo", "ExportMain")',
@@ -277,7 +301,13 @@
                     $('#contactDetailsContainer').html(html);
                 },
                 error: function() {
-                    $('#contactDetailsContainer').html('<div class="alert alert-danger">Failed to load contact details</div>');
+                    $('#contactDetailsContainer').html(`
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            Failed to load contact details. Please try again.
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    `);
                 }
             });
         }
@@ -464,8 +494,8 @@
                 Destination: $('#Destination').val().trim() || null
             };
 
-            // Disable submit button
-            $('#btnSaveLC').prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Updating...');
+            $('#btnSaveLC').prop('disabled', true)
+                .html('<span class="spinner-border spinner-border-sm me-2"></span>Updating...');
 
             $.ajax({
                 url: '@Url.Action("UpdateLCs", "ExportMain")',
@@ -479,26 +509,25 @@
                         showAlert('success', response.message);
                         $('#exportLCModal').modal('hide');
 
-                        // Reload the LC info
-                        const lcName = $('#lcSearch').val();
-                        if (lcName) {
-                            loadLCInfo(lcName);
-                        }
+                        // Update dropdown and reload data
+                        const lcName = formData.MainExpName;
+                        $('#lcSearch').append(`<option value="${lcName}" selected>${lcName}</option>`);
+                        $('#lcSearch').val(lcName).trigger('change');
 
-                        // Reload dropdown
-                        setTimeout(function() {
-                            location.reload();
-                        }, 1500);
+                        // Load the updated LC info
+                        loadLCInfo(lcName);
+                        loadContactDetails(lcName);
+
                     } else {
                         showAlert('danger', response.message);
                     }
                 },
                 error: function(xhr) {
-                    showAlert('danger', 'An error occurred while updating the LC. Please try again.');
-                    console.error('Error:', xhr);
+                    showAlert('danger', 'An error occurred. Please try again.');
                 },
                 complete: function() {
-                    $('#btnSaveLC').prop('disabled', false).html('<i class="bi bi-save"></i> Update LC');
+                    $('#btnSaveLC').prop('disabled', false)
+                        .html('<i class="bi bi-save"></i> Update LC');
                 }
             });
         }
