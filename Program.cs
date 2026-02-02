@@ -9,6 +9,8 @@ using Microsoft.EntityFrameworkCore;
 using CommercialManagement.Services.Logins.LoginServices;
 using CommercialManagement.Services.DropDownSerivces;
 using CommercialManagement.Services.DropDownSerivces.DropDownSerivceImple;
+using CommercialManagement.Services.Style;
+using CommercialManagement.Services.Style.StyleImple;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -46,6 +48,7 @@ builder.Services.AddScoped<DropDownService, DropDownServiceImple>();
 builder.Services.AddScoped<ExportInvoiceService, ExportInvoiceServiceImple>();
 builder.Services.AddScoped<ExportMainService, ExportMainServiceImple>();
 builder.Services.AddScoped<ExportLCItemsService, ExportLCItemsServiceImple>();
+builder.Services.AddScoped<StyleInfoService, StyleInfoServiceImple>();
 
 var app = builder.Build();
 

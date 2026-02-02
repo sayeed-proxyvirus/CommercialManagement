@@ -197,12 +197,11 @@
                 $('#btnSearch').prop('disabled', !val);
             });
 
-            // FIXED: Load invoice info first, then load contact details based on the ExpLCNo from the loaded invoice
             $('#btnSearch').click(function() {
-                const invNo = $('#invSearch').val();
-                if (invNo) {
-                    loadInvoiceInfo(invNo);
-                }
+            const invNo = $('#invSearch').val();
+            if (invNo) {
+                loadInvoiceInfo(invNo);  // This will now automatically load contact details
+            }
             });
 
             // Handle Add button click
@@ -249,11 +248,22 @@
                 success: function(html) {
                     $('#invInfoContainer').html(html);
 
-                    // FIXED: After loading invoice info, extract the ExpLCNo and load contact details
-                    const expLCNo = $('#expLCNo').val();
-                    if (expLCNo) {
-                        loadExportData(expLCNo);
-                    }
+                    // FIXED: Wait for DOM to update, then get the LC number and load contact details
+                    setTimeout(function() {
+                        const expLCNo = $('#expLCNo').val();
+                        console.log('ExpLCNo extracted:', expLCNo);
+
+                        if (expLCNo) {
+                            loadContactDetails(expLCNo);
+                        } else {
+                            console.warn('No ExpLCNo found');
+                            $('#exportDataContainer').html(`
+                                <div class="alert alert-warning" role="alert">
+                                    <i class="bi bi-exclamation-triangle"></i> No LC number found for this invoice
+                                </div>
+                            `);
+                        }
+                    }, 100);
                 },
                 error: function() {
                     $('#invInfoContainer').html(`
@@ -261,6 +271,38 @@
                             <i class="bi bi-exclamation-triangle-fill me-2"></i>Failed to load invoice details. Please try again.
                             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                         </div>`);
+                }
+            });
+        }
+
+        // NEW FUNCTION: Load contact details based on LC number
+        function loadContactDetails(lcNo) {
+            $('#exportDataContainer').html(`
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-body text-center py-5">
+                        <div class="spinner-border text-success mb-3" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="text-muted">Loading Contact Details...</p>
+                    </div>
+                </div>
+            `);
+
+            $.ajax({
+                url: '@Url.Action("GetInvContactInfo", "ExportInvoice")',
+                type: 'GET',
+                data: { LCName: lcNo },
+                success: function(html) {
+                    $('#exportDataContainer').html(html);
+                },
+                error: function() {
+                    $('#exportDataContainer').html(`
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            Failed to load contact details. Please try again.
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    `);
                 }
             });
         }
@@ -298,6 +340,11 @@
 
         function closeInvoiceInfo() {
             $('#invInfoContainer').slideUp(400, function() {
+                $(this).empty();
+            });
+        }
+        function closeInvContactInfo() {
+            $('#exportDataContainer').slideUp(400, function() {
                 $(this).empty();
             });
         }

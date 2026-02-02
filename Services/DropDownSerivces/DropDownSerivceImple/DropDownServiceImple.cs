@@ -2,6 +2,7 @@
 using CommercialManagement.Models.ExpLC;
 using CommercialManagement.Models.ExportInvoice;
 using CommercialManagement.Models.Initial_Stage;
+using CommercialManagement.Models.Styles;
 using Microsoft.EntityFrameworkCore;
 
 namespace CommercialManagement.Services.DropDownSerivces.DropDownSerivceImple
@@ -122,6 +123,20 @@ namespace CommercialManagement.Services.DropDownSerivces.DropDownSerivceImple
                     .FromSqlRaw("EXEC usp_ViewExpInv")
                     .ToList();
                 return exportInvoice;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        public List<StyleInfo> GetStyleInfos() 
+        {
+            try
+            {
+                var styleInf = _context.StyleInfo
+                    .FromSqlRaw("EXEC usp_ViewStyleInfos")
+                    .ToList();
+                return styleInf;
             }
             catch (Exception)
             {

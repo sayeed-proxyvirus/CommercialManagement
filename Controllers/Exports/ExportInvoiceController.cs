@@ -60,21 +60,18 @@ namespace CommercialManagement.Controllers.Exports
         {
             try
             {
-                List<ExportLCViewModel> exportMainContacts = _exportLCItemsService.GetExportLCItems(LCName);
-
-                // Return JSON for dropdown
-                var contacts = exportMainContacts.Select(c => new
+                if (string.IsNullOrEmpty(LCName))
                 {
-                    contactNo = c.ContactNo,
-                    contactId = c.ContactId
-                }).ToList();
-
-                return Json(contacts);
+                    _logger.LogWarning("LCName is null or empty");
+                    return PartialView("_GetInvContactInfo", new List<ExportLCViewModel>());
+                }
+                List<ExportLCViewModel> contacts = _exportLCItemsService.GetExportLCItems(LCName);
+                return PartialView("_GetInvContactInfo", contacts ?? new List<ExportLCViewModel>());
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error loading contacts for LC: {LCName}", LCName);
-                return Json(new List<object>());
+                _logger.LogError(ex, "Error loading contact info for LCName: {LCName}", LCName);
+                return PartialView("_GetInvContactInfo", new List<ExportLCViewModel>());
             }
         }
 

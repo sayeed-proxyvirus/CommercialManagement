@@ -1,6 +1,7 @@
 ﻿using CommercialManagement.Models.ExpLC;
 using CommercialManagement.Models.ExportInvoice;
 using CommercialManagement.Models.Initial_Stage;
+using CommercialManagement.Models.Styles;
 
 namespace CommercialManagement.Services.DropDownSerivces
 {
@@ -14,5 +15,6 @@ namespace CommercialManagement.Services.DropDownSerivces
         List<ApplicantConsignees> GetApplicantConsignees();
         List<ExportMain> GetExportMainLCs();
         List<ExportInvoices> GetExportInvoices();
+        List<StyleInfo> GetStyleInfos();
     }
 }

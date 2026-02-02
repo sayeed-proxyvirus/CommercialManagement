@@ -15,7 +15,7 @@ namespace CommercialManagement.Models.ExportInvoice
         //[Column("ExpInvID")]
         //public int ExpInvID { get; set; }
         [Column("ExpInv")]
-        public string? ExpInv { get; set; }
+        public string ExpInv { get; set; }
         [Column("ExpQuantity")]
         public int? ExpQuantity { get; set; }
         [Column("UnitPrice")]

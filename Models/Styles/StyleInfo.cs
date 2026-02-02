@@ -8,7 +8,7 @@ namespace CommercialManagement.Models.Styles
     {
         [Key]
         [Column("ContactID")]
-        public string? ContactID { get; set; }
+        public int? ContactID { get; set; }
         [Column("ContactNo")]
         public string? ContactNo { get; set; }
         [Column("StyleDesc")]
@@ -26,25 +26,25 @@ namespace CommercialManagement.Models.Styles
         [Column("Wash")]
         public string? Wash { get; set; }
         [Column("TotalQuantity")]
-        public float? TotalQuantity { get; set; }
-        [Column("TotalFabricsQuantity")]
-        public float? TotalFabricsQuantity { get; set; }
+        public decimal? TotalQuantity { get; set; }
+        [Column("TotalFabricQuantity")]
+        public decimal? TotalFabricQuantity { get; set; }
         [Column("ShipmentDate")]
         public DateTime? ShipmentDate { get; set; }
         [Column("StyleCM")]
-        public float? StyleCM { get; set; }
+        public decimal? StyleCM { get; set; }
         [Column("Lbi")]
-        public float? Lbi { get; set; }
+        public decimal? Lbi { get; set; }
         [Column("WashingCharge")]
-        public float? WashingCharge { get; set; }
+        public decimal? WashingCharge { get; set; }
         [Column("FabricDozens")]
-        public float? FabricDozens { get; set; }
+        public decimal? FabricDozens { get; set; }
         [Column("FabricsPerPcs")]
-        public float? FabricsPerPcs { get; set; }
+        public decimal? FabricsPerPcs { get; set; }
         [Column("OrderNo")]
         public string? OrderNo { get; set; }
         [Column("LACPerPcs")]
-        public float? LACPerPcs { get; set; }
+        public decimal? LACPerPcs { get; set; }
 
     }
 }
