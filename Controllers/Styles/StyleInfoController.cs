@@ -1,8 +1,11 @@
 ﻿using CommercialManagement.Models.ExpLC;
 using CommercialManagement.Models.Styles;
+using CommercialManagement.Models.ViewModels;
 using CommercialManagement.Services.DropDownSerivces;
+using CommercialManagement.Services.Exports;
 using CommercialManagement.Services.Style;
 using Microsoft.AspNetCore.Mvc;
+using System.Xml.Linq;
 
 namespace CommercialManagement.Controllers.Styles
 {
@@ -32,6 +35,22 @@ namespace CommercialManagement.Controllers.Styles
             {
                 TempData["ErrorMessage"] = "Failed to load ContactNo. Please try again.";
                 return View(new List<StyleInfo>());
+            }
+        }
+        [HttpGet]
+        public IActionResult GetContactInfo(string contno) 
+        {
+            try
+            {
+
+                contno = "05/057J";
+                List<StyleInfoViewModel> styleInfos = _styleInfoService.GetStyle(contno);
+                return PartialView("_GetStyleInfo", styleInfos);
+            }
+            catch (Exception)
+            {
+
+                throw;
             }
         }
     }
