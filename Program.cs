@@ -49,6 +49,7 @@ builder.Services.AddScoped<ExportInvoiceService, ExportInvoiceServiceImple>();
 builder.Services.AddScoped<ExportMainService, ExportMainServiceImple>();
 builder.Services.AddScoped<ExportLCItemsService, ExportLCItemsServiceImple>();
 builder.Services.AddScoped<StyleInfoService, StyleInfoServiceImple>();
+builder.Services.AddScoped<StyleTransService, StyleTransServiceImple>();
 
 var app = builder.Build();
 

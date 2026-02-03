@@ -1,5 +1,588 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model List<CommercialManagement.Models.Styles.StyleInfo>
 @{
+    ViewData["Title"] = "Style Info Management";
 }
+
+<div class="container-fluid">
+    <div id="alertContainer"></div>
+
+    <!-- Search Panel -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0"><i class="bi bi-palette"></i> Style Info Management</h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-8">
+                    <label for="contactSearch" class="form-label fw-semibold">
+                        <i class="bi bi-search"></i> CONTRACT NO:
+                    </label>
+                    <select class="form-select" id="contactSearch">
+                        <option value="">-- Select Contract Number --</option>
+                        @if (Model != null && Model.Any())
+                        {
+                            foreach (var style in Model)
+                            {
+                                <option value="@style.ContactNo">
+                                    @style.ContactNo
+                                </option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="col-md-4 d-flex align-items-end gap-2">
+                    <button type="button" class="btn btn-info flex-grow-1" id="btnSearch" disabled>
+                        <i class="bi bi-search"></i> Search
+                    </button>
+                    <button type="button" class="btn btn-primary" id="btnAdd">
+                        <i class="bi bi-plus-circle"></i> Add New
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Style Info Container (Partial View) -->
+    <div id="styleInfoContainer"></div>
+</div>
+
+<!-- Add/Edit Style Info Modal -->
+<div class="modal fade" id="styleInfoModal" tabindex="-1" aria-labelledby="styleInfoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title" id="styleInfoModalLabel">
+                    <i class="bi bi-palette"></i> <span id="modalTitle">Add Style Info</span>
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="styleInfoForm">
+                <div class="modal-body">
+                    <input type="hidden" id="ContactID" name="ContactID" value="0" />
+
+                    <div class="row g-3">
+                        <!-- Left Column -->
+                        <div class="col-md-6">
+                            <!-- Contract No -->
+                            <div class="mb-3">
+                                <label for="ContactNo" class="form-label fw-semibold">
+                                    <i class="bi bi-file-text"></i> CONTRACT NO: <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="ContactNo" name="ContactNo"
+                                       placeholder="Enter Contract Number" required maxlength="50">
+                                <div class="invalid-feedback">Please enter Contract Number</div>
+                            </div>
+
+                            <!-- Description -->
+                            <div class="mb-3">
+                                <label for="StyleDesc" class="form-label fw-semibold">
+                                    <i class="bi bi-card-text"></i> DESCRIPTION: <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="StyleDesc" name="StyleDesc"
+                                       placeholder="Enter Style Description" required maxlength="200">
+                                <div class="invalid-feedback">Please enter Description</div>
+                            </div>
+
+                            <!-- Style Name -->
+                            <div class="mb-3">
+                                <label for="StyleName" class="form-label fw-semibold">
+                                    <i class="bi bi-tag"></i> STYLE NAME: <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="StyleName" name="StyleName"
+                                       placeholder="Enter Style Name" required maxlength="100">
+                                <div class="invalid-feedback">Please enter Style Name</div>
+                            </div>
+
+                            <!-- Customer -->
+                            <div class="mb-3">
+                                <label for="CustID" class="form-label fw-semibold">
+                                    <i class="bi bi-people"></i> CUSTOMER: <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select" id="CustID" name="CustID" required>
+                                    <option value="">-- Select Customer --</option>
+                                    @if (ViewBag.ListCustomer != null)
+                                    {
+                                        foreach (var customer in ViewBag.ListCustomer)
+                                        {
+                                            <option value="@customer.CustID">@customer.CustName</option>
+                                        }
+                                    }
+                                </select>
+                                <div class="invalid-feedback">Please select a Customer</div>
+                            </div>
+
+                            <!-- Supplier/Beneficiary -->
+                            <div class="mb-3">
+                                <label for="BenID" class="form-label fw-semibold">
+                                    <i class="bi bi-building"></i> SUPPLIER: <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select" id="BenID" name="BenID" required>
+                                    <option value="">-- Select Supplier --</option>
+                                    @if (ViewBag.ListBeneficiary != null)
+                                    {
+                                        foreach (var beneficiary in ViewBag.ListBeneficiary)
+                                        {
+                                            <option value="@beneficiary.BenID">@beneficiary.BenName</option>
+                                        }
+                                    }
+                                </select>
+                                <div class="invalid-feedback">Please select a Supplier</div>
+                            </div>
+
+                            <!-- Washing -->
+                            <div class="mb-3">
+                                <label for="Wash" class="form-label fw-semibold">
+                                    <i class="bi bi-droplet"></i> WASHING:
+                                </label>
+                                <input type="text" class="form-control" id="Wash" name="Wash"
+                                       placeholder="Enter Washing Type" maxlength="100">
+                            </div>
+
+                            <!-- Order No -->
+                            <div class="mb-3">
+                                <label for="OrderNo" class="form-label fw-semibold">
+                                    <i class="bi bi-hash"></i> ORDER NO:
+                                </label>
+                                <input type="text" class="form-control" id="OrderNo" name="OrderNo"
+                                       placeholder="Enter Order Number" maxlength="50">
+                            </div>
+                        </div>
+
+                        <!-- Right Column -->
+                        <div class="col-md-6">
+                            <!-- Quantity -->
+                            <div class="mb-3">
+                                <label for="TotalQuantity" class="form-label fw-semibold">
+                                    <i class="bi bi-box"></i> QUANTITY:
+                                </label>
+                                <input type="number" class="form-control" id="TotalQuantity" name="TotalQuantity"
+                                       placeholder="0" step="1" min="0">
+                            </div>
+
+                            <!-- Shipment Date -->
+                            <div class="mb-3">
+                                <label for="ShipmentDate" class="form-label fw-semibold">
+                                    <i class="bi bi-calendar-event"></i> SHIPMENT DATE:
+                                </label>
+                                <input type="date" class="form-control" id="ShipmentDate" name="ShipmentDate">
+                            </div>
+
+                            <!-- LAC$ /PC -->
+                            <div class="mb-3">
+                                <label for="LACPerPcs" class="form-label fw-semibold">
+                                    <i class="bi bi-currency-dollar"></i> LAC$ /PC:
+                                </label>
+                                <input type="number" class="form-control" id="LACPerPcs" name="LACPerPcs"
+                                       placeholder="0.0000" step="0.0001" min="0">
+                            </div>
+
+                            <!-- Style CM -->
+                            <div class="mb-3">
+                                <label for="StyleCM" class="form-label fw-semibold">
+                                    <i class="bi bi-calculator"></i> STYLE CM:
+                                </label>
+                                <input type="number" class="form-control" id="StyleCM" name="StyleCM"
+                                       placeholder="0.00" step="0.01" min="0">
+                            </div>
+
+                            <!-- LBI -->
+                            <div class="mb-3">
+                                <label for="Lbi" class="form-label fw-semibold">
+                                    <i class="bi bi-percent"></i> LBI:
+                                </label>
+                                <input type="number" class="form-control" id="Lbi" name="Lbi"
+                                       placeholder="0.00" step="0.01" min="0">
+                            </div>
+
+                            <!-- Washing Charge -->
+                            <div class="mb-3">
+                                <label for="WashingCharge" class="form-label fw-semibold">
+                                    <i class="bi bi-cash"></i> WASHING CHARGE:
+                                </label>
+                                <input type="number" class="form-control" id="WashingCharge" name="WashingCharge"
+                                       placeholder="0.00" step="0.01" min="0">
+                            </div>
+
+                            <!-- Fabric Dozens -->
+                            <div class="mb-3">
+                                <label for="FabricDozens" class="form-label fw-semibold">
+                                    <i class="bi bi-layers"></i> FABRIC DOZENS:
+                                </label>
+                                <input type="number" class="form-control" id="FabricDozens" name="FabricDozens"
+                                       placeholder="0.00" step="0.01" min="0">
+                            </div>
+
+                            <!-- Fabrics Per Pcs -->
+                            <div class="mb-3">
+                                <label for="FabricsPerPcs" class="form-label fw-semibold">
+                                    <i class="bi bi-grid"></i> FABRICS PER PCS:
+                                </label>
+                                <input type="number" class="form-control" id="FabricsPerPcs" name="FabricsPerPcs"
+                                       placeholder="0.00" step="0.01" min="0">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle"></i> Cancel
+                    </button>
+                    <button type="button" class="btn btn-success" onclick="saveStyle()">
+                        <i class="bi bi-save"></i> Save
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('#contactSearch').change(function() {
+                const val = $(this).val();
+                $('#btnSearch').prop('disabled', !val);
+            });
+
+            $('#btnSearch').click(function() {
+                const contactNo = $('#contactSearch').val();
+                if (contactNo) {
+                    loadStyleInfo(contactNo);
+                }
+            });
+
+            // Handle Add button click
+            $('#btnAdd').click(function() {
+                openAddModal();
+            });
+        });
+
+        function loadStyleInfo(contactNo) {
+            $('#styleInfoContainer').html(`
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-body text-center py-5">
+                        <div class="spinner-border text-info mb-3" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="text-muted">Loading Style Information...</p>
+                    </div>
+                </div>
+            `);
+
+            $.ajax({
+                url: '@Url.Action("GetContactInfo", "StyleInfo")',
+                type: 'GET',
+                data: { contno: contactNo },
+                success: function(html) {
+                    $('#styleInfoContainer').html(html);
+                },
+                error: function() {
+                    $('#styleInfoContainer').html(`
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            Failed to load style details. Please try again.
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    `);
+                }
+            });
+        }
+
+        function closeStyleInfo() {
+            $('#styleInfoContainer').slideUp(400, function() {
+                $(this).empty();
+            });
+        }
+
+        // Open Add Modal
+        function openAddModal() {
+            // Reset form
+            $('#styleInfoForm')[0].reset();
+            $('#ContactID').val('0');
+
+            // Update modal title
+            $('#modalTitle').text('Add Style Info');
+
+            // Clear validation
+            $('#styleInfoForm').removeClass('was-validated');
+            $('.form-control, .form-select').removeClass('is-invalid');
+
+            // Show modal
+            $('#styleInfoModal').modal('show');
+        }
+
+        // Edit Style
+        function editStyle() {
+            const contactID = $('#styleInfoCard').data('contactid');
+
+            // Get data from the current style info display
+            const styleData = {
+                ContactID: contactID,
+                ContactNo: $('#contactNo').val(),
+                StyleDesc: $('#styleDesc').val(),
+                StyleName: $('#styleName').val(),
+                CustID: $('#customer').val(),
+                BenID: $('#supplier').val(),
+                Wash: $('#washing').val(),
+                OrderNo: $('#orderNo').val(),
+                TotalQuantity: $('#quantity').val(),
+                ShipmentDate: $('#shipmentDate').val(),
+                LACPerPcs: $('#lacPerPc').val(),
+                StyleCM: $('#styleCM').val(),
+                Lbi: $('#lbi').val(),
+                WashingCharge: $('#washingCharge').val(),
+                FabricDozens: $('#fabricDozens').val(),
+                FabricsPerPcs: $('#fabricsPerPcs').val()
+            };
+
+            // Populate form with data
+            $('#ContactID').val(styleData.ContactID);
+            $('#ContactNo').val(styleData.ContactNo);
+            $('#StyleDesc').val(styleData.StyleDesc);
+            $('#StyleName').val(styleData.StyleName);
+            $('#CustID').val(styleData.CustID);
+            $('#BenID').val(styleData.BenID);
+            $('#Wash').val(styleData.Wash);
+            $('#OrderNo').val(styleData.OrderNo);
+            $('#TotalQuantity').val(styleData.TotalQuantity);
+            $('#ShipmentDate').val(styleData.ShipmentDate);
+            $('#LACPerPcs').val(styleData.LACPerPcs);
+            $('#StyleCM').val(styleData.StyleCM);
+            $('#Lbi').val(styleData.Lbi);
+            $('#WashingCharge').val(styleData.WashingCharge);
+            $('#FabricDozens').val(styleData.FabricDozens);
+            $('#FabricsPerPcs').val(styleData.FabricsPerPcs);
+
+            // Update modal title
+            $('#modalTitle').text('Edit Style Info');
+
+            // Clear validation
+            $('#styleInfoForm').removeClass('was-validated');
+            $('.form-control, .form-select').removeClass('is-invalid');
+
+            // Show modal
+            $('#styleInfoModal').modal('show');
+        }
+
+        // Validate form
+        function validateForm() {
+            let isValid = true;
+
+            // Clear previous validation
+            $('.form-control, .form-select').removeClass('is-invalid');
+
+            // Check required fields
+            if (!$('#ContactNo').val().trim()) {
+                $('#ContactNo').addClass('is-invalid');
+                isValid = false;
+            }
+
+            if (!$('#StyleDesc').val().trim()) {
+                $('#StyleDesc').addClass('is-invalid');
+                isValid = false;
+            }
+
+            if (!$('#StyleName').val().trim()) {
+                $('#StyleName').addClass('is-invalid');
+                isValid = false;
+            }
+
+            if (!$('#CustID').val()) {
+                $('#CustID').addClass('is-invalid');
+                isValid = false;
+            }
+
+            if (!$('#BenID').val()) {
+                $('#BenID').addClass('is-invalid');
+                isValid = false;
+            }
+
+            if (!isValid) {
+                showAlert('warning', 'Please fill in all required fields');
+            }
+
+            return isValid;
+        }
+
+        // Save Style (Add or Update)
+        function saveStyle() {
+            if (!validateForm()) {
+                return false;
+            }
+
+            const contactID = $('#ContactID').val();
+            const isEdit = contactID && contactID !== '0';
+
+            if (isEdit) {
+                updateStyleInfo();
+            } else {
+                addStyleInfo();
+            }
+        }
+
+        // Add Style Info
+        function addStyleInfo() {
+            const formData = {
+                ContactNo: $('#ContactNo').val().trim(),
+                StyleDesc: $('#StyleDesc').val().trim(),
+                StyleName: $('#StyleName').val().trim(),
+                CustID: parseInt($('#CustID').val()),
+                BenID: parseInt($('#BenID').val()),
+                Wash: $('#Wash').val().trim() || null,
+                OrderNo: $('#OrderNo').val().trim() || null,
+                TotalQuantity: parseFloat($('#TotalQuantity').val()) || null,
+                ShipmentDate: $('#ShipmentDate').val() || null,
+                LACPerPcs: parseFloat($('#LACPerPcs').val()) || null,
+                StyleCM: parseFloat($('#StyleCM').val()) || null,
+                Lbi: parseFloat($('#Lbi').val()) || null,
+                WashingCharge: parseFloat($('#WashingCharge').val()) || null,
+                FabricDozens: parseFloat($('#FabricDozens').val()) || null,
+                FabricsPerPcs: parseFloat($('#FabricsPerPcs').val()) || null
+            };
+
+            $.ajax({
+                url: '@Url.Action("AddStyle", "StyleInfo")',
+                type: 'POST',
+                data: formData,
+                headers: {
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(response) {
+                    if (response.success) {
+                        showAlert('success', response.message);
+                        $('#styleInfoModal').modal('hide');
+
+                        // Reload the page to refresh contract dropdown
+                        setTimeout(function() {
+                            location.reload();
+                        }, 1500);
+                    } else {
+                        showAlert('danger', response.message);
+                    }
+                },
+                error: function(xhr) {
+                    showAlert('danger', 'An error occurred while adding the style info. Please try again.');
+                    console.error('Error:', xhr);
+                }
+            });
+        }
+
+        // Update Style Info
+        function updateStyleInfo() {
+            const formData = {
+                ContactID: parseInt($('#ContactID').val()),
+                ContactNo: $('#ContactNo').val().trim(),
+                StyleDesc: $('#StyleDesc').val().trim(),
+                StyleName: $('#StyleName').val().trim(),
+                CustID: parseInt($('#CustID').val()),
+                BenID: parseInt($('#BenID').val()),
+                Wash: $('#Wash').val().trim() || null,
+                OrderNo: $('#OrderNo').val().trim() || null,
+                TotalQuantity: parseFloat($('#TotalQuantity').val()) || null,
+                ShipmentDate: $('#ShipmentDate').val() || null,
+                LACPerPcs: parseFloat($('#LACPerPcs').val()) || null,
+                StyleCM: parseFloat($('#StyleCM').val()) || null,
+                Lbi: parseFloat($('#Lbi').val()) || null,
+                WashingCharge: parseFloat($('#WashingCharge').val()) || null,
+                FabricDozens: parseFloat($('#FabricDozens').val()) || null,
+                FabricsPerPcs: parseFloat($('#FabricsPerPcs').val()) || null
+            };
+
+            $.ajax({
+                url: '@Url.Action("UpdateStyle", "StyleInfo")',
+                type: 'POST',
+                data: formData,
+                headers: {
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(response) {
+                    if (response.success) {
+                        showAlert('success', response.message);
+                        $('#styleInfoModal').modal('hide');
+
+                        // Update dropdown and reload data
+                        const contactNo = formData.ContactNo;
+                        $('#contactSearch').val(contactNo).trigger('change');
+
+                        // Load the updated style info
+                        loadStyleInfo(contactNo);
+                    } else {
+                        showAlert('danger', response.message);
+                    }
+                },
+                error: function(xhr) {
+                    showAlert('danger', 'An error occurred. Please try again.');
+                }
+            });
+        }
+
+        // Show alert helper
+        function showAlert(type, message) {
+            const icons = {
+                success: 'check-circle',
+                danger: 'exclamation-triangle',
+                warning: 'exclamation-circle',
+                info: 'info-circle'
+            };
+
+            const alertHtml = `
+                <div class="alert alert-${type} alert-dismissible fade show shadow-sm" role="alert">
+                    <i class="bi bi-${icons[type]}"></i> ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `;
+
+            $('#alertContainer').html(alertHtml);
+
+            // Auto dismiss after 5 seconds
+            setTimeout(function() {
+                $('.alert').fadeOut(400, function() {
+                    $(this).remove();
+                });
+            }, 5000);
+
+            // Scroll to top to show alert
+            $('html, body').animate({ scrollTop: 0 }, 300);
+        }
+    </script>
+}
+
+<style>
+    .form-label {
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .card {
+        border-radius: 12px;
+    }
+
+    .btn:hover {
+        transform: translateY(-1px);
+        transition: transform 0.2s;
+    }
+
+    #contactSearch {
+        font-size: 1rem;
+    }
+
+    .modal-body {
+        max-height: 70vh;
+        overflow-y: auto;
+    }
+
+    .invalid-feedback {
+        display: none;
+        font-size: 0.875rem;
+    }
+
+    .form-control.is-invalid,
+    .form-select.is-invalid {
+        border-color: #dc3545;
+    }
+
+        .form-control.is-invalid ~ .invalid-feedback,
+        .form-select.is-invalid ~ .invalid-feedback {
+            display: block;
+        }
+</style>

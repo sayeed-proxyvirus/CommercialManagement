@@ -17,12 +17,8 @@ namespace CommercialManagement.Models.Styles
         public string? StyleName { get; set; }
         [Column("CustID")]
         public int? CustID { get; set; }
-        [Column("CustCode")]
-        public string? CustCode { get; set; }
         [Column("BenID")]
         public int? BenID { get; set; }
-        [Column("BenCode")]
-        public string? BenCode { get; set; }
         [Column("Wash")]
         public string? Wash { get; set; }
         [Column("TotalQuantity")]

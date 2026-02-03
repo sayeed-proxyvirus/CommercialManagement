@@ -8,13 +8,13 @@ namespace CommercialManagement.Models.Styles
     {
         [Key]
         [Column("ContactID")]
-        public string? ContactID { get; set; }
+        public int? ContactID { get; set; }
         [Column("ContactNo")]
         public string? ContactNo { get; set; }
         [Column("ItemID")]
         public int? ItemID { get; set; }
-        [Column("ItemCode")]
-        public string? ItemCode { get; set; }
+        [Column("ItemName")]
+        public string? ItemName { get; set; }
         [Column("Price")]
         public float? Price { get; set; }
         [Column("FabConsumpPerDzn")]

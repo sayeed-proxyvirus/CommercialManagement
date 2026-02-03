@@ -3,3 +3,299 @@
 @{
     var data = Model?.FirstOrDefault();
 }
+
+<div class="card shadow-sm border-0 mb-4" id="styleInfoCard" data-contactid="@(data?.ContactID ?? 0)">
+    <div class="card-header bg-light border-bottom d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="bi bi-palette"></i> Style Info Sheet</h5>
+        <button type="button" class="btn-close" onclick="closeStyleInfo()"></button>
+    </div>
+    <div class="card-body">
+        <form id="styleInfoForm">
+            <div class="row g-3">
+                <!-- Top Section - Contract No (Right-aligned like in image) -->
+                <div class="col-12 mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0 text-muted">Style Information</h6>
+                        <div class="text-end">
+                            <label for="contractNo" class="form-label fw-semibold mb-1">Contract nr.</label>
+                            <input type="text" class="form-control form-control-lg fw-bold text-end"
+                                   id="contractNo" style="width: 200px; display: inline-block;"
+                                   value="@(data?.ContactNo ?? "")" readonly>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Left Column -->
+                <div class="col-md-6">
+                    <!-- Description -->
+                    <div class="mb-3">
+                        <label for="styleDesc" class="form-label fw-semibold">Description</label>
+                        <input type="text" class="form-control" id="styleDesc"
+                               value="@(data?.StyleDesc ?? "")" readonly style="background-color: #e9ecef;">
+                    </div>
+
+                    <!-- Style Name -->
+                    <div class="mb-3">
+                        <label for="styleName" class="form-label fw-semibold">Stylename</label>
+                        <input type="text" class="form-control" id="styleName"
+                               value="@(data?.StyleName ?? "")" readonly style="background-color: #e9ecef;">
+                    </div>
+
+                    <!-- Customer -->
+                    <div class="mb-3">
+                        <label for="customer" class="form-label fw-semibold">Customer</label>
+                        <select class="form-select" id="customer" disabled style="background-color: #e9ecef;">
+                            <option value="">-- Select Customer --</option>
+                            @if (ViewBag.ListCustomer != null)
+                            {
+                                foreach (var customer in ViewBag.ListCustomer)
+                                {
+                                    <option value="@customer.CustID"
+                                            selected="@(customer.CustID == data?.CustID)">
+                                        @customer.CustName
+                                    </option>
+                                }
+                            }
+                        </select>
+                    </div>
+
+                    <!-- Supplier -->
+                    <div class="mb-3">
+                        <label for="supplier" class="form-label fw-semibold">Supplier</label>
+                        <select class="form-select" id="supplier" disabled style="background-color: #e9ecef;">
+                            <option value="">-- Select Supplier --</option>
+                            @if (ViewBag.ListBeneficiary != null)
+                            {
+                                foreach (var beneficiary in ViewBag.ListBeneficiary)
+                                {
+                                    <option value="@beneficiary.BenID"
+                                            selected="@(beneficiary.BenID == data?.BenID)">
+                                        @beneficiary.BenName
+                                    </option>
+                                }
+                            }
+                        </select>
+                    </div>
+
+                    <!-- Quantity -->
+                    <div class="mb-3">
+                        <label for="quantity" class="form-label fw-semibold">Quantity</label>
+                        <input type="number" class="form-control text-end" id="quantity"
+                               value="@(data?.TotalQuantity ?? 0)" readonly style="background-color: #e9ecef;">
+                    </div>
+                </div>
+
+                <!-- Right Column -->
+                <div class="col-md-6">
+                    <!-- Washing -->
+                    <div class="mb-3">
+                        <label for="washing" class="form-label fw-semibold">Washing</label>
+                        <input type="text" class="form-control" id="washing"
+                               value="@(data?.Wash ?? "")" readonly style="background-color: #e9ecef;">
+                    </div>
+
+                    <!-- Order # -->
+                    <div class="mb-3">
+                        <label for="orderNo" class="form-label fw-semibold">Order #</label>
+                        <input type="text" class="form-control" id="orderNo"
+                               value="@(data?.OrderNo ?? "")" readonly style="background-color: #e9ecef;">
+                    </div>
+
+                    <!-- Shipment Date -->
+                    <div class="mb-3">
+                        <label for="shipmentDate" class="form-label fw-semibold">Shipment</label>
+                        <input type="date" class="form-control" id="shipmentDate"
+                               value="@(data?.ShipmentDate?.ToString("yyyy-MM-dd") ?? "")" readonly style="background-color: #e9ecef;">
+                    </div>
+
+                    <!-- LAC$ /PC -->
+                    <div class="mb-3">
+                        <label for="lacPerPc" class="form-label fw-semibold">LAC$ /PC</label>
+                        <input type="number" class="form-control text-end" id="lacPerPc"
+                               value="@(data?.LACPerPcs ?? 0)" step="0.0001" readonly style="background-color: #e9ecef;">
+                    </div>
+                </div>
+
+                <!-- Additional Fields Row (if needed) -->
+                <div class="col-12">
+                    <hr class="my-3">
+                    <h6 class="text-muted mb-3">Additional Details</h6>
+                </div>
+
+                <!-- Additional Details - Two Columns -->
+                <div class="col-md-6">
+                    <!-- Style CM -->
+                    <div class="mb-3">
+                        <label for="styleCM" class="form-label fw-semibold">Style CM</label>
+                        <input type="number" class="form-control text-end" id="styleCM"
+                               value="@(data?.StyleCM ?? 0)" step="0.01" readonly style="background-color: #e9ecef;">
+                    </div>
+
+                    <!-- LBI -->
+                    <div class="mb-3">
+                        <label for="lbi" class="form-label fw-semibold">LBI</label>
+                        <input type="number" class="form-control text-end" id="lbi"
+                               value="@(data?.Lbi ?? 0)" step="0.01" readonly style="background-color: #e9ecef;">
+                    </div>
+
+                    <!-- Washing Charge -->
+                    <div class="mb-3">
+                        <label for="washingCharge" class="form-label fw-semibold">Washing Charge</label>
+                        <input type="number" class="form-control text-end" id="washingCharge"
+                               value="@(data?.WashingCharge ?? 0)" step="0.01" readonly style="background-color: #e9ecef;">
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <!-- Fabric Dozens -->
+                    <div class="mb-3">
+                        <label for="fabricDozens" class="form-label fw-semibold">Fabric Dozens</label>
+                        <input type="number" class="form-control text-end" id="fabricDozens"
+                               value="@(data?.FabricDozens ?? 0)" step="0.01" readonly style="background-color: #e9ecef;">
+                    </div>
+
+                    <!-- Fabrics Per Pcs -->
+                    <div class="mb-3">
+                        <label for="fabricsPerPcs" class="form-label fw-semibold">Fabrics Per Pcs</label>
+                        <input type="number" class="form-control text-end" id="fabricsPerPcs"
+                               value="@(data?.FabricsPerPcs ?? 0)" step="0.01" readonly style="background-color: #e9ecef;">
+                    </div>
+
+                    <!-- Total Fabric Quantity -->
+                    <div class="mb-3">
+                        <label for="totalFabricQty" class="form-label fw-semibold">Total Fabric Quantity</label>
+                        <input type="number" class="form-control text-end" id="totalFabricQty"
+                               value="@(data?.TotalFabricQuantity ?? 0)" step="0.01" readonly style="background-color: #e9ecef;">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="row mt-4">
+                <div class="col-12 d-flex justify-content-end gap-2">
+                    <button type="button" class="btn btn-secondary" onclick="closeStyleInfo()">
+                        <i class="bi bi-x-circle"></i> Close
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="editStyle()">
+                        <i class="bi bi-pencil"></i> Edit
+                    </button>
+                    <button type="button" class="btn btn-success" id="btnSaveStyle" onclick="saveStyleInfo()" style="display: none;">
+                        <i class="bi bi-save"></i> Save
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function editStyle() {
+        console.log('Edit mode activated');
+
+        // Enable all form fields for editing except the Contract No
+        $('#styleInfoForm').find('input:not(#contractNo), select').prop('disabled', false)
+            .prop('readonly', false)
+            .css('background-color', '#ffffff');
+
+        // Show Save button, hide Edit button
+        $('#btnSaveStyle').show();
+        $('button[onclick="editStyle()"]').hide();
+
+        showAlert('info', 'Edit mode enabled. Modify the fields and click Save.');
+    }
+
+    function saveStyleInfo() {
+        console.log('Save Style Info clicked');
+
+        const contactID = $('#styleInfoCard').data('contactid');
+
+        if (!contactID || contactID === 0) {
+            showAlert('danger', 'Error: Contact ID not found');
+            return;
+        }
+
+        const formData = {
+            ContactID: parseInt(contactID),
+            ContactNo: $('#contractNo').val().trim(),
+            StyleDesc: $('#styleDesc').val().trim(),
+            StyleName: $('#styleName').val().trim(),
+            CustID: parseInt($('#customer').val()) || null,
+            BenID: parseInt($('#supplier').val()) || null,
+            Wash: $('#washing').val().trim() || null,
+            OrderNo: $('#orderNo').val().trim() || null,
+            TotalQuantity: parseFloat($('#quantity').val()) || null,
+            ShipmentDate: $('#shipmentDate').val() || null,
+            LACPerPcs: parseFloat($('#lacPerPc').val()) || null,
+            StyleCM: parseFloat($('#styleCM').val()) || null,
+            Lbi: parseFloat($('#lbi').val()) || null,
+            WashingCharge: parseFloat($('#washingCharge').val()) || null,
+            FabricDozens: parseFloat($('#fabricDozens').val()) || null,
+            FabricsPerPcs: parseFloat($('#fabricsPerPcs').val()) || null,
+            TotalFabricQuantity: parseFloat($('#totalFabricQty').val()) || null
+        };
+
+        // Validate required fields
+        if (!formData.ContactNo || !formData.StyleDesc || !formData.StyleName ||
+            !formData.CustID || !formData.BenID) {
+            showAlert('warning', 'Please fill in all required fields');
+            return;
+        }
+
+        $('#btnSaveStyle').prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Saving...');
+
+        $.ajax({
+            url: '@Url.Action("UpdateStyle", "StyleInfo")',
+            type: 'POST',
+            data: formData,
+            headers: {
+                'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+            },
+            success: function(response) {
+                if (response.success) {
+                    showAlert('success', response.message);
+
+                    // Immediately reload the style info without page refresh
+                    const contactNo = formData.ContactNo;
+                    loadStyleInfo(contactNo);
+
+                    // Update dropdown selection
+                    $('#contactSearch').val(contactNo).trigger('change');
+
+                } else {
+                    showAlert('danger', response.message);
+                    $('#btnSaveStyle').prop('disabled', false).html('<i class="bi bi-save"></i> Save');
+                }
+            },
+            error: function(xhr) {
+                showAlert('danger', 'An error occurred while updating the style info. Please try again.');
+                $('#btnSaveStyle').prop('disabled', false).html('<i class="bi bi-save"></i> Save');
+            }
+        });
+    }
+</script>
+
+<style>
+    .form-label {
+        font-size: 0.875rem;
+        color: #000;
+        margin-bottom: 0.25rem;
+        font-weight: 600;
+    }
+
+    .form-control:disabled,
+    .form-control[readonly],
+    .form-select:disabled {
+        background-color: #e9ecef;
+        cursor: not-allowed;
+    }
+
+    #contractNo {
+        border: 2px solid #dee2e6;
+        font-size: 1.1rem;
+    }
+
+    .card-header {
+        background-color: #f8f9fa;
+        border-bottom: 2px solid #dee2e6;
+    }
+</style>
