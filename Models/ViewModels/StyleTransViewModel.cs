@@ -8,11 +8,11 @@ namespace CommercialManagement.Models.ViewModels
         public string? ContactNo { get; set; }
         public int? ItemID { get; set; }
         public string? ItemName { get; set; }
-        public float? Price { get; set; }
-        public float? FabConsumpPerDzn { get; set; }
-        public float? ActualQuantity { get; set; }
-        public float? ActualPrice { get; set; }
-        public float? Booked { get; set; }
-        public float? FabricWidth { get; set; }
+        public decimal? Price { get; set; }
+        public decimal? FabConsumpPerDzn { get; set; }
+        public decimal? ActualQuantity { get; set; }
+        public decimal? ActualPrice { get; set; }
+        public decimal? Booked { get; set; }
+        public decimal? FabricWidth { get; set; }
     }
 }

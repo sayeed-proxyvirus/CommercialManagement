@@ -1,0 +1,500 @@
+﻿@model List<CommercialManagement.Models.ViewModels.StyleTransViewModel>
+
+@{
+    var totalFabConsump = Model?.Sum(x => x.FabConsumpPerDzn ?? 0) ?? 0;
+    var totalActualQty = Model?.Sum(x => x.ActualQuantity ?? 0) ?? 0;
+    var totalBooked = Model?.Sum(x => x.Booked ?? 0) ?? 0;
+}
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-light border-bottom d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="bi bi-scissors"></i> Style Transaction - Fabrics</h5>
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-sm btn-success" onclick="openAddFabricModal()">
+                <i class="bi bi-plus-circle"></i> Add Fabric
+            </button>
+            <button type="button" class="btn-close" onclick="closeStyleTrans()"></button>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover align-middle mb-0" id="fabricTable">
+                <thead class="table-light">
+                    <tr>
+                        <th class="px-3 text-center" style="width: 250px;">Fabrics</th>
+                        <th class="text-center" style="width: 120px;">Price</th>
+                        <th class="text-center" style="width: 120px;">Consump/dzn</th>
+                        <th class="text-center" style="width: 120px;">Total</th>
+                        <th class="text-center" style="width: 120px;">Fab rqed</th>
+                        <th class="text-center" style="width: 100px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="fabricTableBody">
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tr data-contactid="@item.ContactID" data-itemid="@item.ItemID">
+                                <td class="px-3">
+                                    <strong>@(item.ItemName ?? "-")</strong>
+                                </td>
+                                <td class="text-end">@((item.Price ?? 0).ToString("N4"))</td>
+                                <td class="text-end">@((item.FabConsumpPerDzn ?? 0).ToString("N2"))</td>
+                                <td class="text-end">@((item.ActualQuantity ?? 0).ToString("N2"))</td>
+                                <td class="text-end">@((item.Booked ?? 0).ToString("N2"))</td>
+                                <td class="text-center">
+                                    <button type="button"
+                                            class="btn btn-sm btn-outline-warning"
+                                            onclick="editFabric(@(item.ContactID ?? 0), @(item.ItemID ?? 0), '@item.ItemName', @(item.Price ?? 0), @(item.FabConsumpPerDzn ?? 0), @(item.ActualQuantity ?? 0), @(item.ActualPrice ?? 0), @(item.Booked ?? 0), @(item.FabricWidth ?? 0))"
+                                            title="Edit Fabric">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-muted">
+                                <i class="bi bi-inbox fs-1 d-block mb-3"></i>
+                                <p class="mb-0">No fabric data found</p>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+                @if (Model != null && Model.Any())
+                {
+                    <tfoot class="table-light fw-bold">
+                        <tr>
+                            <td class="px-3 text-end">
+                                <strong>Total:</strong>
+                            </td>
+                            <td class="text-end"></td>
+                            <td class="text-end">
+                                <strong>Total</strong>
+                            </td>
+                            <td class="text-end">
+                                <strong>Total</strong>
+                            </td>
+                            <td class="text-end text-success">
+                                <strong>Total:</strong>
+                            </td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                }
+            </table>
+        </div>
+
+        @if (Model != null && Model.Any())
+        {
+            <div class="card-footer bg-white border-top">
+                <div class="d-flex justify-content-between align-items-center">
+                    <small class="text-muted">
+                        Showing <span id="pageInfo">@Model.Count entries</span>
+                    </small>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Fabric Modal -->
+<div class="modal fade" id="fabricModal" tabindex="-1" aria-labelledby="fabricModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title" id="fabricModalLabel">
+                    <i class="bi bi-scissors"></i> <span id="fabricModalTitle">Add Fabric</span>
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="fabricForm">
+                <div class="modal-body">
+                    <!-- Hidden fields -->
+                    <input type="hidden" id="fabricContactID" name="ContactID" value="" />
+                    <input type="hidden" id="fabricContactNo" name="ContactNo" value="" />
+
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <!-- Fabric Selection -->
+                            <div class="mb-3">
+                                <label for="fabricItemID" class="form-label fw-semibold">
+                                    <i class="bi bi-scissors"></i> Fabrics: <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select" id="fabricItemID" name="ItemID" required>
+                                    <option value="">-- Select Fabric --</option>
+                                    @if (ViewBag.ListItem != null)
+                                    {
+                                        foreach (var fabric in ViewBag.ListItem)
+                                        {
+                                            <option value="@fabric.ItemID" data-itemname="@fabric.ItemName" data-itemcode="@fabric.ItemCode">
+                                                @fabric.ItemName (@fabric.ItemCode)
+                                            </option>
+                                        }
+                                    }
+                                </select>
+                                <div class="invalid-feedback">Please select a fabric</div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <!-- Price -->
+                            <div class="mb-3">
+                                <label for="fabricPrice" class="form-label fw-semibold">
+                                    <i class="bi bi-currency-dollar"></i> Price: <span class="text-danger">*</span>
+                                </label>
+                                <input type="number" class="form-control text-end" id="fabricPrice" name="Price"
+                                       placeholder="0.0000" step="0.0001" min="0" required>
+                                <div class="invalid-feedback">Please enter price</div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <!-- Consumption per Dozen -->
+                            <div class="mb-3">
+                                <label for="fabricConsump" class="form-label fw-semibold">
+                                    <i class="bi bi-box"></i> Consump/dzn: <span class="text-danger">*</span>
+                                </label>
+                                <input type="number" class="form-control text-end" id="fabricConsump" name="FabConsumpPerDzn"
+                                       placeholder="0.00" step="0.01" min="0" required>
+                                <div class="invalid-feedback">Please enter consumption per dozen</div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <!-- Actual Quantity -->
+                            <div class="mb-3">
+                                <label for="fabricActualQty" class="form-label fw-semibold">
+                                    <i class="bi bi-calculator"></i> Total/Actual Quantity:
+                                </label>
+                                <input type="number" class="form-control text-end" id="fabricActualQty" name="ActualQuantity"
+                                       placeholder="0.00" step="0.01" min="0">
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <!-- Actual Price -->
+                            <div class="mb-3">
+                                <label for="fabricActualPrice" class="form-label fw-semibold">
+                                    <i class="bi bi-currency-dollar"></i> Actual Price:
+                                </label>
+                                <input type="number" class="form-control text-end" id="fabricActualPrice" name="ActualPrice"
+                                       placeholder="0.0000" step="0.0001" min="0">
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <!-- Booked -->
+                            <div class="mb-3">
+                                <label for="fabricBooked" class="form-label fw-semibold">
+                                    <i class="bi bi-bookmark-check"></i> Booked:
+                                </label>
+                                <input type="number" class="form-control text-end" id="fabricBooked" name="Booked"
+                                       placeholder="0.00" step="0.01" min="0">
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <!-- Fabric Width -->
+                            <div class="mb-3">
+                                <label for="fabricWidth" class="form-label fw-semibold">
+                                    <i class="bi bi-arrows-expand"></i> Fabric Width:
+                                </label>
+                                <input type="number" class="form-control text-end" id="fabricWidth" name="FabricWidth"
+                                       placeholder="0.00" step="0.01" min="0">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle"></i> Cancel
+                    </button>
+                    <button type="submit" class="btn btn-success" id="btnSaveFabric">
+                        <i class="bi bi-save"></i> <span id="btnSaveFabricText">Save Fabric</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function() {
+        $('#fabricForm').on('submit', function(e) {
+            e.preventDefault();
+            if (!validateFabricForm()) return false;
+
+            const isEdit = $('#fabricModalTitle').text().includes('Edit');
+
+            if (isEdit) {
+                updateFabric();
+            } else {
+                addFabric();
+            }
+        });
+    });
+
+    function openAddFabricModal() {
+        const contactNo = $('#contactSearch').val();
+
+        if (!contactNo) {
+            showAlert('warning', 'Please select a contact first');
+            return;
+        }
+
+        $('#fabricForm')[0].reset();
+        $('#fabricItemID').prop('disabled', false);
+        $('#fabricContactNo').val(contactNo);
+
+        $('#fabricModalTitle').text('Add Fabric');
+        $('#btnSaveFabricText').text('Save Fabric');
+
+        $('#fabricForm').removeClass('was-validated');
+        $('.form-control, .form-select').removeClass('is-invalid');
+
+        $('#fabricModal').modal('show');
+    }
+
+    function editFabric(contactId, itemId, itemName, price, consump, actualQty, actualPrice, booked, width) {
+        const contactNo = $('#contactSearch').val();
+        console.log(contactId);
+        $('#fabricContactID').val(contactId);
+        $('#fabricContactNo').val(contactNo);
+        $('#fabricItemID').val(itemId).prop('disabled', true);
+        $('#fabricPrice').val(price);
+        $('#fabricConsump').val(consump);
+        $('#fabricActualQty').val(actualQty);
+        $('#fabricActualPrice').val(actualPrice);
+        $('#fabricBooked').val(booked);
+        $('#fabricWidth').val(width);
+
+        $('#fabricModalTitle').text('Edit Fabric');
+        $('#btnSaveFabricText').text('Update Fabric');
+
+        $('#fabricForm').removeClass('was-validated');
+        $('.form-control, .form-select').removeClass('is-invalid');
+
+        $('#fabricModal').modal('show');
+    }
+
+    function validateFabricForm() {
+        let isValid = true;
+        $('.form-control, .form-select').removeClass('is-invalid');
+
+        const validations = [
+            { field: '#fabricItemID', check: val => !val },
+            { field: '#fabricPrice', check: val => !val || parseFloat(val) <= 0 },
+            { field: '#fabricConsump', check: val => !val || parseFloat(val) <= 0 }
+        ];
+
+        validations.forEach(v => {
+            if (v.check($(v.field).val())) {
+                $(v.field).addClass('is-invalid');
+                isValid = false;
+            }
+        });
+
+        if (!isValid) showAlert('warning', 'Please fill in all required fields correctly');
+        return isValid;
+    }
+
+    function addFabric() {
+        const contactNo = $('#contactSearch').val();
+        const selectedOption = $('#fabricItemID option:selected');
+
+        const formData = {
+            ContactID: $('#fabricContactID').val(),
+            ContactNo: contactNo,
+            ItemID: parseInt($('#fabricItemID').val()),
+            ItemName: selectedOption.data('itemname') || '',
+            Price: parseFloat($('#fabricPrice').val()),
+            FabConsumpPerDzn: parseFloat($('#fabricConsump').val()),
+            ActualQuantity: parseFloat($('#fabricActualQty').val()) || 0,
+            ActualPrice: parseFloat($('#fabricActualPrice').val()) || 0,
+            Booked: parseFloat($('#fabricBooked').val()) || 0,
+            FabricWidth: parseFloat($('#fabricWidth').val()) || 0
+        };
+
+        $('#btnSaveFabric').prop('disabled', true)
+            .html('<span class="spinner-border spinner-border-sm me-2"></span>Saving...');
+
+        $.ajax({
+            url: '@Url.Action("AddStyleTrans", "StyleInfo")',
+            type: 'POST',
+            data: formData,
+            headers: { 'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val() },
+            success: function(response) {
+                if (response.success) {
+                    showAlert('success', response.message);
+                    $('#fabricModal').modal('hide');
+
+                    // Reload the style trans data
+                    loadStyleTrans(contactNo);
+                } else {
+                    showAlert('danger', response.message);
+                }
+            },
+            error: function(xhr) {
+                showAlert('danger', 'An error occurred. Please try again.');
+                console.error('Error:', xhr);
+            },
+            complete: function() {
+                $('#btnSaveFabric').prop('disabled', false)
+                    .html('<i class="bi bi-save"></i> Save Fabric');
+            }
+        });
+    }
+
+    function updateFabric() {
+        const contactNo = $('#contactSearch').val();
+        const selectedOption = $('#fabricItemID option:selected');
+
+        const formData = {
+            ContactID: parseInt($('#fabricContactID').val()),
+            ContactNo: contactNo,
+            ItemID: parseInt($('#fabricItemID').val()),
+            ItemName: selectedOption.data('itemname') || '',
+            Price: parseFloat($('#fabricPrice').val()),
+            FabConsumpPerDzn: parseFloat($('#fabricConsump').val()),
+            ActualQuantity: parseFloat($('#fabricActualQty').val()) || 0,
+            ActualPrice: parseFloat($('#fabricActualPrice').val()) || 0,
+            Booked: parseFloat($('#fabricBooked').val()) || 0,
+            FabricWidth: parseFloat($('#fabricWidth').val()) || 0
+        };
+
+        $('#btnSaveFabric').prop('disabled', true)
+            .html('<span class="spinner-border spinner-border-sm me-2"></span>Updating...');
+
+        $.ajax({
+            url: '@Url.Action("UpdateStyleTrans", "StyleInfo")',
+            type: 'POST',
+            data: formData,
+            headers: { 'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val() },
+            success: function(response) {
+                if (response.success) {
+                    showAlert('success', response.message);
+                    $('#fabricModal').modal('hide');
+
+                    // Reload the style trans data
+                    loadStyleTrans(contactNo);
+                } else {
+                    showAlert('danger', response.message);
+                }
+            },
+            error: function(xhr) {
+                showAlert('danger', 'An error occurred. Please try again.');
+                console.error('Error:', xhr);
+            },
+            complete: function() {
+                $('#btnSaveFabric').prop('disabled', false)
+                    .html('<i class="bi bi-save"></i> Update Fabric');
+            }
+        });
+    }
+
+    function closeStyleTrans() {
+        $('#styleTransContainer').slideUp(400, function() {
+            $(this).empty();
+        });
+    }
+
+    function loadStyleTrans(contactNo) {
+        $('#styleTransContainer').html(`
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-body text-center py-5">
+                    <div class="spinner-border text-info mb-3" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="text-muted">Loading Fabric Transactions...</p>
+                </div>
+            </div>
+        `);
+
+        $.ajax({
+            url: '@Url.Action("GetTransInfo", "StyleInfo")',
+            type: 'GET',
+            data: { contno: contactNo },
+            success: function(html) {
+                $('#styleTransContainer').html(html);
+            },
+            error: function() {
+                $('#styleTransContainer').html(`
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        Failed to load fabric transactions. Please try again.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                `);
+            }
+        });
+    }
+</script>
+
+<style>
+    #fabricTable {
+        font-size: 0.9rem;
+    }
+
+        #fabricTable thead th {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            font-weight: 600;
+            color: #495057;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+        }
+
+        #fabricTable tbody tr {
+            transition: background-color 0.2s;
+        }
+
+            #fabricTable tbody tr:hover {
+                background-color: #f1f3f5;
+            }
+
+        #fabricTable tbody td,
+        #fabricTable tfoot td {
+            border: 1px solid #dee2e6;
+        }
+
+        #fabricTable tfoot {
+            font-size: 0.95rem;
+            background-color: #f8f9fa;
+            border-top: 2px solid #dee2e6;
+        }
+
+            #fabricTable tfoot td {
+                padding: 0.75rem;
+            }
+
+    .btn-outline-warning:hover {
+        color: #000;
+    }
+
+    .invalid-feedback {
+        display: none;
+        font-size: 0.875rem;
+    }
+
+    .form-control.is-invalid,
+    .form-select.is-invalid {
+        border-color: #dc3545;
+    }
+
+        .form-control.is-invalid ~ .invalid-feedback,
+        .form-select.is-invalid ~ .invalid-feedback {
+            display: block;
+        }
+
+    .table-bordered {
+        border: 1px solid #dee2e6;
+    }
+
+        .table-bordered th,
+        .table-bordered td {
+            border: 1px solid #dee2e6;
+        }
+</style>

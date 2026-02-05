@@ -200,5 +200,114 @@ namespace CommercialManagement.Controllers.Styles
                 });
             }
         }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult AddStyleTrans(StyleTrans formData)
+        {
+            try
+            {
+                var userName = HttpContext.Session.GetString("UserName") ?? "System";
+                var styleTrans = new StyleTrans
+                {
+                    ContactID = formData.ContactID,
+                    ContactNo = formData.ContactNo?.Trim(),
+                    ItemID = formData.ItemID,
+                    ItemName = formData.ItemName?.Trim(),
+                    Price = formData.Price,
+                    FabConsumpPerDzn = formData.FabConsumpPerDzn,
+                    ActualQuantity = formData.ActualQuantity,
+                    ActualPrice = formData.ActualPrice,
+                    Booked = formData.Booked,
+                    FabricWidth = formData.FabricWidth
+                };
+                bool success = _styletransService.AddStyles(styleTrans);
+                if (success)
+                {
+                    _logger.LogInformation("Style Trans added Successfully");
+                    return Json(new
+                    {
+                        success = true,
+                        message = $"Fabric '{formData.ItemName}' has been added successfully!!!"
+                    });
+                }
+                else
+                {
+                    _logger.LogWarning("Style Trans data addition has been failed");
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Failed to add Fabric. Please try again."
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error adding style trans");
+                return Json(new
+                {
+                    success = false,
+                    message = "An error occurred. Please try again."
+                });
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult UpdateStyleTrans(StyleTrans formData)
+        {
+            try
+            {
+                _logger.LogInformation($"Updating Style Trans: {formData.ItemName}");
+                var userName = HttpContext.Session.GetString("UserName") ?? "System";
+                var existingTrans = _styletransService.GetbyId(formData.ContactID ?? 0);
+                if (existingTrans == null)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Fabric transaction not found."
+                    });
+                }
+                existingTrans.ItemID = formData.ItemID;
+                existingTrans.ItemName = formData.ItemName?.Trim();
+                existingTrans.Price = formData.Price;
+                existingTrans.FabConsumpPerDzn = formData.FabConsumpPerDzn;
+                existingTrans.ActualQuantity = formData.ActualQuantity;
+                existingTrans.ActualPrice = formData.ActualPrice;
+                existingTrans.Booked = formData.Booked;
+                existingTrans.FabricWidth = formData.FabricWidth;
+
+                bool success = _styletransService.UpdateStyle(existingTrans);
+                if (success)
+                {
+                    _logger.LogInformation("Style Trans updated Successfully");
+                    return Json(new
+                    {
+                        success = true,
+                        message = $"Fabric '{formData.ItemName}' has been updated successfully!!!"
+                    });
+                }
+                else
+                {
+                    _logger.LogWarning("Style Trans data update has been failed");
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Failed to update Fabric. Please try again."
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating style trans");
+                return Json(new
+                {
+                    success = false,
+                    message = "An error occurred. Please try again."
+                });
+            }
+        }
     }
 }

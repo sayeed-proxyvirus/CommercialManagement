@@ -16,16 +16,16 @@ namespace CommercialManagement.Models.Styles
         [Column("ItemName")]
         public string? ItemName { get; set; }
         [Column("Price")]
-        public float? Price { get; set; }
+        public decimal? Price { get; set; }
         [Column("FabConsumpPerDzn")]
-        public float? FabConsumpPerDzn { get; set; }
+        public decimal? FabConsumpPerDzn { get; set; }
         [Column("ActualQuantity")]
-        public float? ActualQuantity { get; set; }
+        public decimal? ActualQuantity { get; set; }
         [Column("ActualPrice")]
-        public float? ActualPrice { get; set; }
+        public decimal? ActualPrice { get; set; }
         [Column("Booked")]
-        public float? Booked { get; set; }
+        public decimal? Booked { get; set; }
         [Column("FabricWidth")]
-        public float? FabricWidth { get; set; }
+        public decimal? FabricWidth { get; set; }
     }
 }

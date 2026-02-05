@@ -44,6 +44,9 @@
 
     <!-- Style Info Container (Partial View) -->
     <div id="styleInfoContainer"></div>
+
+    <!-- Style Trans Container (Fabric Transactions) -->
+    <div id="styleTransContainer"></div>
 </div>
 
 <!-- Add/Edit Style Info Modal -->
@@ -275,6 +278,8 @@
                 data: { contno: contactNo },
                 success: function(html) {
                     $('#styleInfoContainer').html(html);
+                    // Load StyleTrans after StyleInfo loads successfully
+                    loadStyleTrans(contactNo);
                 },
                 error: function() {
                     $('#styleInfoContainer').html(`
@@ -291,6 +296,37 @@
         function closeStyleInfo() {
             $('#styleInfoContainer').slideUp(400, function() {
                 $(this).empty();
+            });
+        }
+
+        function loadStyleTrans(contactNo) {
+            $('#styleTransContainer').html(`
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-body text-center py-5">
+                        <div class="spinner-border text-info mb-3" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="text-muted">Loading Fabric Transactions...</p>
+                    </div>
+                </div>
+            `);
+
+            $.ajax({
+                url: '@Url.Action("GetTransInfo", "StyleInfo")',
+                type: 'GET',
+                data: { contno: contactNo },
+                success: function(html) {
+                    $('#styleTransContainer').html(html);
+                },
+                error: function() {
+                    $('#styleTransContainer').html(`
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            Failed to load fabric transactions. Please try again.
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    `);
+                }
             });
         }
 
