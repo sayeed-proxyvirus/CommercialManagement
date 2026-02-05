@@ -4,6 +4,7 @@
     var totalFabConsump = Model?.Sum(x => x.FabConsumpPerDzn ?? 0) ?? 0;
     var totalActualQty = Model?.Sum(x => x.ActualQuantity ?? 0) ?? 0;
     var totalBooked = Model?.Sum(x => x.Booked ?? 0) ?? 0;
+
 }
 
 <div class="card shadow-sm border-0 mb-4">

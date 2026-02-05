@@ -5,6 +5,7 @@ using CommercialManagement.Services.DropDownSerivces;
 using CommercialManagement.Services.Exports;
 using CommercialManagement.Services.Style;
 using Microsoft.AspNetCore.Mvc;
+using System.Reflection;
 using System.Xml.Linq;
 
 namespace CommercialManagement.Controllers.Styles
@@ -65,6 +66,9 @@ namespace CommercialManagement.Controllers.Styles
             {
 
                 List<StyleTransViewModel> styleTrans = _styletransService.GetStyleTrans(contno);
+                var styleInfo = _styleInfoService.GetStyle(contno).FirstOrDefault();
+                ViewBag.ContactID = styleInfo?.ContactID ?? 0;
+                ViewBag.ContactNo = contno;
                 ViewBag.ListItem = _dropDownService.GetFabrics();
                 return PartialView("_GetStyleTrans", styleTrans);
             }
